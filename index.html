@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sorry With Love</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", "Segoe UI", Tahoma, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: #fff;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 45%, #fad0c4 100%);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 24%),
+        radial-gradient(circle at 80% 30%, rgba(255, 182, 193, 0.35), transparent 22%),
+        radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.18), transparent 25%);
+      z-index: 0;
+      animation: drift 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.08);
+      }
+    }
+
+    /* Mobile/performance: allow users to disable animations */
+    @media (prefers-reduced-motion: reduce) {
+
+      /* Only stop non-essential UI animations; keep the brick game functional */
+      .overlay,
+      .overlay *,
+      .card *,
+      .sparkle,
+      .heart-fall,
+      #heartFallLayer,
+      button.glow-circling::before,
+      button.glow-circling::after,
+      .sweep::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 18px 70px;
+    }
+
+    .card {
+      background: rgba(40, 10, 30, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(14px);
+      border-radius: 28px;
+      padding: 30px 24px;
+      margin-bottom: 24px;
+      animation: glow 3s ease-in-out infinite alternate;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Circling glow around cards */
+    .card.circling-glow::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 30px;
+      background: conic-gradient(from 180deg,
+          rgba(255, 77, 141, 0.0),
+          rgba(255, 77, 141, 0.85),
+          rgba(254, 207, 239, 0.0),
+          rgba(36, 217, 111, 0.55),
+          rgba(255, 77, 141, 0.0));
+      filter: blur(10px);
+      opacity: 0.85;
+      animation: spinGlow 2.2s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .card.circling-glow>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes spinGlow {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.16);
+      }
+
+      to {
+        box-shadow: 0 0 34px rgba(255, 255, 255, 0.34);
+      }
+    }
+
+    /* Sweep animation overlay */
+    .sweep::after {
+      content: "";
+      position: absolute;
+      inset: -40% -60%;
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0),
+          rgba(255, 240, 245, 0.55),
+          rgba(36, 217, 111, 0.35),
+          rgba(255, 255, 255, 0));
+      transform: rotate(18deg) translateX(-40%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      animation: sweepMove 3.8s ease-in-out infinite;
+    }
+
+    @keyframes sweepMove {
+      0% {
+        opacity: 0;
+        transform: rotate(18deg) translateX(-55%);
+      }
+
+      15% {
+        opacity: 0.55;
+      }
+
+      55% {
+        opacity: 0.25;
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(18deg) translateX(55%);
+      }
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+      margin-bottom: 14px;
+      color: #fffafc;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+    }
+
+    p {
+      text-align: center;
+      line-height: 1.9;
+      font-size: 1.05rem;
+      color: #fffdfd;
+    }
+
+    .accent {
+      color: #fff4a3;
+      font-weight: 700;
+    }
+
+    .soft {
+      color: #ffeef7;
+    }
+
+    .proposal-setup {
+      display: grid;
+      gap: 12px;
+      max-width: 560px;
+      margin: 18px auto 0;
+    }
+
+    .proposal-setup input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #3b0c22;
+      font: inherit;
+      outline: none;
+    }
+
+    .proposal-setup input:focus {
+      box-shadow: 0 0 0 4px rgba(255, 244, 163, 0.28);
+    }
+
+    .proposal-status {
+      margin-top: 14px;
+      text-align: center;
+      color: #fff4a3;
+      font-weight: 800;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .proposal-status a {
+      color: #fff4a3;
+    }
+
+    .heart {
+      color: #fff0f5;
+      text-shadow: 0 0 14px #fff;
+      animation: pulse 1.3s infinite;
+      display: inline-block;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.22);
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      min-height: 100px;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      padding: 14px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.25s ease;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    .pink-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #ff4d8d, #ff86b3);
+      box-shadow: 0 0 18px rgba(255, 77, 141, 0.8);
+    }
+
+    .green-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #24d96f, #69e39a);
+      box-shadow: 0 0 18px rgba(36, 217, 111, 0.75);
+    }
+
+    .red-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #ff5e62, #ff9966);
+      box-shadow: 0 0 18px rgba(255, 94, 98, 0.75);
+      position: absolute;
+      left: 55%;
+      top: 15px;
+    }
+
+    /* Circling glow around buttons */
+    button.glow-circling {
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    button.glow-circling::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 999px;
+      background: conic-gradient(from 120deg,
+          rgba(255, 255, 255, 0.0),
+          rgba(255, 240, 245, 0.85),
+          rgba(255, 77, 141, 0.0),
+          rgba(254, 207, 239, 0.55),
+          rgba(36, 217, 111, 0.0),
+          rgba(255, 240, 245, 0.0));
+      filter: blur(9px);
+      opacity: 0.9;
+      animation: spinGlow 1.9s linear infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    button.glow-circling::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      box-shadow: 0 0 24px rgba(255, 255, 255, 0.18);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .hidden-box {
+      display: none;
+      margin-top: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 20px;
+      padding: 18px 16px;
+      animation: fadeIn 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hidden-box.sweep-box::after {
+      content: "";
+      position: absolute;
+      inset: -60% -70%;
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0),
+          rgba(255, 240, 245, 0.45),
+          rgba(36, 217, 111, 0.30),
+          rgba(255, 255, 255, 0));
+      transform: rotate(18deg) translateX(-55%);
+      opacity: 0;
+      pointer-events: none;
+      animation: sweepMove 3.1s ease-in-out infinite;
+    }
+
+    .hidden-box p {
+      color: #fffafc;
+    }
+
+    /* Progress-bar-like light effect */
+    .hidden-box.progress-anim::before {
+      content: "";
+      position: absolute;
+      left: -10%;
+      top: 0;
+      height: 4px;
+      width: 120%;
+      background: linear-gradient(90deg,
+          rgba(255, 255, 255, 0),
+          rgba(255, 240, 245, 0.95),
+          rgba(36, 217, 111, 0.6),
+          rgba(255, 255, 255, 0));
+      filter: blur(1px);
+      opacity: 0.95;
+      animation: progressGlow 1.25s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes progressGlow {
+      0% {
+        transform: translateX(-25%);
+        opacity: 0;
+      }
+
+      15% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(25%);
+        opacity: 0;
+      }
+    }
+
+    .show {
+      display: block;
+    }
+
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .music-status {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.92rem;
+      color: #fff8fb;
+      opacity: 1;
+    }
+
+    .sparkle {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 10px #fff;
+      opacity: 0.65;
+      z-index: 0;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      from {
+        transform: translateY(-10vh);
+      }
+
+      to {
+        transform: translateY(110vh);
+      }
+    }
+
+    @media (max-width: 700px), (pointer: coarse) {
+      body {
+        background-attachment: scroll;
+      }
+
+      .overlay {
+        animation: none;
+        transform: none;
+      }
+
+      .container {
+        padding: 22px 12px 46px;
+      }
+
+      .card {
+        border-radius: 20px;
+        padding: 22px 16px;
+        animation: none;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.16);
+      }
+
+      .card.circling-glow::before,
+      button.glow-circling::before,
+      button.glow-circling::after,
+      .sweep::after,
+      .hidden-box.sweep-box::after {
+        animation: none;
+        opacity: 0.22;
+        filter: blur(5px);
+      }
+
+      .heart {
+        animation-duration: 2.4s;
+      }
+
+      button:hover {
+        transform: none;
+      }
+
+      .buttons {
+        min-height: 86px;
+      }
+
+      p {
+        font-size: 1rem;
+        line-height: 1.75;
+      }
+    }
+
+    .audio-box {
+      width: 100%;
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* Falling hearts animation layer */
+    #heartFallLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .heart-fall {
+      position: absolute;
+      top: -10vh;
+      font-size: 20px;
+      text-shadow: 0 0 14px rgba(255, 77, 141, 0.9);
+      animation: heartFall var(--dur, 1.7s) linear forwards;
+      will-change: transform, opacity;
+      opacity: 0.98;
+      filter: drop-shadow(0 0 8px rgba(255, 77, 141, 0.35));
+    }
+
+    @keyframes heartFall {
+      0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate3d(0, 120vh, 0) rotate(220deg);
+        opacity: 0;
+      }
+    }
+
+
+
+    audio {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 999px;
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay"></div>
+
+  <div class="container">
+    <div class="card circling-glow sweep" id="sorryCard">
+      <h1>My Deepest Sorry</h1>
+      <p>
+        I am truly sorry for the pain I caused you.
+        I know my words and actions may have hurt your heart, and I honestly regret that.
+        You matter to me more than I can express, and I hope you can feel the sincerity in my apology.
+        If I could take back my mistake, I would do it in a heartbeat.
+        Please give me one chance to make things better, to prove that I can love, respect, and care for you the right
+        way.
+        <span class="heart">❤</span>
+      </p>
+
+
+      <div class="buttons">
+        <button class="pink-btn glow-circling" id="musicBtn">Play Romantic Song</button>
+        <button class="pink-btn glow-circling" id="hiddenBtn">Reveal Hidden Message</button>
+      </div>
+
+      <div class="hidden-box sweep-box" id="hiddenBox">
+        <p class="soft">
+          Hidden message: You are the sweetest person I have ever known.
+          Even when I make mistakes, my heart still chooses you every single time.
+
+          <br><br>
+          You’re not just “someone”—you’re my calm, my courage, and my forever.
+          I’m sorry for the moments that made you doubt my love.
+
+          <br><br>
+          <b>Sayari:</b><br>
+          “Tere bina lafz bhi khaamosh ho jaate hain…<br>
+          Main har ghalti ka ilaaj ban-na chahta hoon tere liye.”
+        </p>
+      </div>
+
+      <div class="music-status">Music will start after your first click or tap.</div>
+
+      <div class="audio-box">
+        <!-- Avoid preloading extra work until user click -->
+        <audio id="bgMusic" loop preload="none">
+          <source src="udaarian.mp3" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    </div>
+
+    <div class="card circling-glow sweep" id="proposalCard">
+      <h2>A Small Proposal</h2>
+      <p>
+        I do not want perfect words; I only want a real chance to love you better every day.
+        If your heart is willing, I want to stay by your side through every smile, every silence, and every dream.
+        I promise to protect your peace, respect your feelings, and cherish your presence.
+        <span class="accent">Your happiness will always matter to me.</span>
+      </p>
+
+      <div id="proposalSetup" class="proposal-setup">
+        <input id="senderName" type="text" placeholder="Your name">
+        <input id="senderEmail" type="email" placeholder="Your email for the result">
+        <input id="recipientName" type="text" placeholder="Their name">
+        <button class="pink-btn glow-circling" id="createProposalBtn" type="button">Create Unique Proposal Link</button>
+        <div class="proposal-status" id="proposalCreateStatus"></div>
+      </div>
+
+      <div class="buttons" style="position: relative;">
+        <button class="green-btn glow-circling" id="acceptBtn">Accept</button>
+        <button class="red-btn glow-circling" id="rejectBtn">Reject</button>
+      </div>
+
+      <div class="proposal-status" id="proposalResponseStatus"></div>
+
+      <div class="hidden-box sweep-box" id="acceptMsg">
+        <p class="soft">
+          Thank you for saying yes.
+          You just made my heart overflow with happiness.
+          From today, I want to be the reason behind your smile, your calm, and your beautiful little moments.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="heartFallLayer" aria-hidden="true"></div>
+
+  <!-- Fullscreen win animation layer (used by the brick game) -->
+  <div id="winLoveOverlay" style="display:none; position: fixed; inset: 0; z-index: 10000; pointer-events:none;">
+    <div id="winLoveMsg"
+      style="position:absolute; top:-100%; left:50%; transform:translateX(-50%); width:100%; text-align:center; font-weight:1000; font-size: clamp(44px, 8vw, 92px); line-height:1.05; color:#fff; text-shadow: 0 0 24px rgba(255,255,255,.35);">
+      I LOVE YOU
+    </div>
+  </div>
+
+  <div class="card circling-glow sweep" id="gameCard" style="margin-top: 16px;">
+
+    <h2>Love Brick Game</h2>
+    <div id="brickGameContainer"></div>
+
+    <!-- Heart animation (below the brick game, isolated) -->
+    <!-- (Removed) Web heart canvas below game to reduce lag -->
+    <div id="heartBelowGameWrap" style="display:none; margin-top:14px;">
+      <div
+        style="text-align:center; font-weight:900; color:#fffafc; text-shadow:0 0 10px rgba(0,0,0,.25); margin-bottom:10px;">
+        Glowing Heart</div>
+      <canvas id="heartBelowGameCanvas" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+
+  <script src="brick-game.js"></script>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyieQYY360Go_8MZVHlp02syENMhZ93hIc2BQKV63BxPPXHwdwCHp3oV1o3idMtH2V/exec";
+
+    const isLowPowerView = window.matchMedia && (
+      window.matchMedia("(max-width: 700px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+
+    // init brick breaker game (delay on mobile so layout/paint is ready)
+    function initBrickOnReady() {
+      if (!window.initBrickLoveGame) return;
+      window.initBrickLoveGame({
+        containerId: 'brickGameContainer',
+        onWin: () => { },
+        onLose: () => { }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        requestAnimationFrame(() => requestAnimationFrame(initBrickOnReady));
+      });
+    } else {
+      requestAnimationFrame(() => requestAnimationFrame(initBrickOnReady));
+    }
+
+
+    const hiddenBtn = document.getElementById("hiddenBtn");
+
+    const hiddenBox = document.getElementById("hiddenBox");
+
+    const musicBtn = document.getElementById("musicBtn");
+    const acceptBtn = document.getElementById("acceptBtn");
+    const rejectBtn = document.getElementById("rejectBtn");
+    const createProposalBtn = document.getElementById("createProposalBtn");
+    const proposalSetup = document.getElementById("proposalSetup");
+    const proposalCreateStatus = document.getElementById("proposalCreateStatus");
+    const proposalResponseStatus = document.getElementById("proposalResponseStatus");
+
+    const acceptMsg = document.getElementById("acceptMsg");
+    const bgMusic = document.getElementById("bgMusic");
+    const proposalId = new URLSearchParams(window.location.search).get("proposal") || "";
+
+    function isBackendReady() {
+      return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("PASTE_YOUR");
+    }
+
+    function proposalRequest(params) {
+      return new Promise((resolve, reject) => {
+        if (!isBackendReady()) {
+          reject(new Error("Backend URL is not set yet."));
+          return;
+        }
+
+        const callbackName = "proposalCallback_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+        const script = document.createElement("script");
+        const url = new URL(APPS_SCRIPT_URL);
+
+        Object.entries({ ...params, callback: callbackName }).forEach(([key, value]) => {
+          url.searchParams.set(key, value || "");
+        });
+
+        window[callbackName] = (data) => {
+          resolve(data);
+          delete window[callbackName];
+          script.remove();
+        };
+
+        script.onerror = () => {
+          delete window[callbackName];
+          script.remove();
+          reject(new Error("Could not reach the proposal backend."));
+        };
+
+        script.src = url.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    function setProposalMode() {
+      if (proposalId) {
+        proposalSetup.style.display = "none";
+        acceptBtn.disabled = false;
+        rejectBtn.disabled = false;
+        proposalResponseStatus.textContent = "";
+      } else {
+        acceptBtn.disabled = true;
+        rejectBtn.disabled = true;
+        proposalResponseStatus.textContent = "Create a unique proposal link first, then send that link.";
+      }
+    }
+
+    setProposalMode();
+
+    createProposalBtn.addEventListener("click", async () => {
+      const senderName = document.getElementById("senderName").value;
+      const senderEmail = document.getElementById("senderEmail").value;
+      const recipientName = document.getElementById("recipientName").value;
+
+      createProposalBtn.disabled = true;
+      proposalCreateStatus.textContent = "Creating your private link...";
+
+      try {
+        const data = await proposalRequest({
+          action: "create",
+          senderName,
+          senderEmail,
+          recipientName,
+        });
+
+        if (!data.ok) throw new Error(data.error || "Could not create proposal link.");
+
+        proposalCreateStatus.innerHTML = `Your unique link is ready:<br><a href="${data.link}">${data.link}</a>`;
+      } catch (error) {
+        proposalCreateStatus.textContent = error.message;
+      } finally {
+        createProposalBtn.disabled = false;
+      }
+    });
+
+    async function recordProposalResponse(choice) {
+      if (!proposalId) return false;
+
+      proposalResponseStatus.textContent = "Sending your answer...";
+
+      try {
+        const data = await proposalRequest({
+          action: "respond",
+          id: proposalId,
+          choice,
+          userAgent: navigator.userAgent,
+        });
+
+        if (!data.ok) throw new Error(data.error || "Could not save the answer.");
+
+        proposalResponseStatus.textContent = choice === "accepted"
+          ? "Your yes has been sent."
+          : "Your answer has been sent.";
+        return true;
+      } catch (error) {
+        proposalResponseStatus.textContent = error.message;
+        return false;
+      }
+    }
+
+    hiddenBtn.addEventListener("click", () => {
+      hiddenBox.classList.toggle("show");
+
+      if (hiddenBox.classList.contains("show")) {
+        hiddenBox.classList.remove("progress-anim");
+        void hiddenBox.offsetWidth; // restart animation
+        hiddenBox.classList.add("progress-anim");
+      }
+    });
+
+
+    function startMusic(showLyrics = true) {
+      // Start audio if available (lyrics animations will run only from this button)
+      bgMusic.volume = 0.7;
+      bgMusic.play().catch(() => { });
+
+      if (showLyrics) showLyricsSweep();
+    }
+
+    // If some other click triggers lyrics layer, block it.
+    // This prevents the "card animation opening" glitch when clicking Accept.
+    document.getElementById("acceptBtn").addEventListener("click", (e) => {
+      const layerEl = document.getElementById("lyricsSweepLayer");
+      if (layerEl) layerEl.remove();
+    });
+
+    musicBtn.addEventListener("click", startMusic);
+    document.addEventListener("click", () => {
+      if (bgMusic.paused) startMusic(false);
+    }, { once: true });
+
+    // ---- Lyrics sweep cards (runs even if audio fails) ----
+    function showLyricsSweep() {
+      const existing = document.getElementById("lyricsSweepLayer");
+      if (existing) return;
+
+      // Guard: prevent multiple expensive overlays from stacking due to repeated clicks
+      if (showLyricsSweep._opening) return;
+      showLyricsSweep._opening = true;
+      setTimeout(() => (showLyricsSweep._opening = false), 700);
+
+      const layer = document.createElement("div");
+      layer.id = "lyricsSweepLayer";
+
+      layer.style.position = "fixed";
+      layer.style.inset = "0";
+      layer.style.zIndex = "10002";
+      // During lyrics, block the rest of the page.
+      layer.style.pointerEvents = "auto";
+      layer.style.background = "rgba(0,0,0,.35)";
+      // Allow page scrolling again by blocking only interaction while overlay is open
+      document.body.style.overflow = "hidden";
+      layer.style.display = "flex";
+      layer.style.alignItems = "flex-start";
+      layer.style.justifyContent = "center";
+      layer.style.paddingTop = "90px";
+
+
+      const sweepWrap = document.createElement("div");
+      sweepWrap.style.width = "min(860px, 94vw)";
+      sweepWrap.style.display = "grid";
+      // Portrait: show one card deck at a time (no multi-column landscape cards).
+      sweepWrap.style.gridTemplateColumns = "1fr";
+
+      sweepWrap.style.gap = "14px";
+      sweepWrap.style.zIndex = "10003";
+
+      // Lyrics cards (brown card game). You can later edit/expand these segments.
+      const lyricsCards = [
+        "Ho laawaan ishqe de ambari udaariyan\nSaanu pyar diyan chadhiyan khumariyan",
+        "Ho laawan ishqe de ambari udaariyan\nMainu pyar diyan chadhiyan khumariyan",
+        "Aa mere pair na zameen utte laggde\nPair na zameen utte laggde",
+        "Lakhaan chashme mohabbtan de waggde\nOh raati mithe mithe supne vi thugde",
+        "Na gall mere vas di rahi\nNa gall mere vas di rahi",
+        "O kisse aisiyan nigahan mainu takkeya\nChaunde hoye vi na dil ruk sakeya",
+        "Ho laawan baahan ch samet kayenaat main\nDassan kainu kainu ishqe di baat main",
+        "Aa rang phulla da vi hor goohda ho gaya\nPaani pyar wala pattiyan nu dho gaya",
+        "Nigah jis te sawalli hove rabb di\nSache ishqe di laag ohnu lagdi",
+        "Aa rom rom ch Satinder hai vaseya\nMeri apni parandi mainu daseya",
+        "Ho kisse aisiyan nigahan mainu takkeya\nGiya pair ishqe de vich rakheya",
+        "Badi lambi ae kahani mere pyar di",
+        "Sing this song,",
+      ];
+
+      // Card stack UI: cards DO NOT fall. They sit and shuffle like a deck.
+      sweepWrap.innerHTML = "";
+
+      const deck = document.createElement("div");
+      deck.style.position = "relative";
+      deck.style.zIndex = "3";
+      deck.style.width = "100%";
+      deck.style.minHeight = "240px";
+      deck.style.display = "flex";
+      deck.style.alignItems = "flex-start";
+      deck.style.justifyContent = "center";
+
+      sweepWrap.appendChild(deck);
+
+      // Next + Close buttons
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "Next";
+      nextBtn.style.margin = "14px auto 0";
+
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "Close";
+      closeBtn.style.margin = "10px auto 0";
+      nextBtn.style.display = "block";
+      nextBtn.style.border = "none";
+      nextBtn.style.cursor = "pointer";
+      nextBtn.style.padding = "12px 22px";
+      nextBtn.style.borderRadius = "999px";
+      nextBtn.style.fontWeight = "900";
+      nextBtn.style.color = "#fff";
+      nextBtn.style.background = "linear-gradient(135deg, #8b5a2b, #c8894c)";
+      nextBtn.style.boxShadow = "0 0 22px rgba(200,137,76,.35)";
+      nextBtn.style.pointerEvents = "auto";
+
+      const controls = document.createElement("div");
+      // Put buttons in a guaranteed visible controls area at the bottom of the overlay.
+      controls.style.position = "absolute";
+      controls.style.left = "0";
+      controls.style.right = "0";
+      controls.style.bottom = "36px";
+      controls.style.width = "100%";
+      controls.style.display = "flex";
+      controls.style.flexDirection = "row";
+      controls.style.alignItems = "center";
+      controls.style.justifyContent = "center";
+      controls.style.gap = "0px";
+      controls.style.zIndex = "5";
+      controls.style.pointerEvents = "auto";
+
+
+      // Close on the left, Next on the right
+      closeBtn.style.display = "inline-block";
+      closeBtn.style.margin = "0";
+      closeBtn.style.pointerEvents = "auto";
+      controls.appendChild(closeBtn);
+      controls.appendChild(nextBtn);
+
+      sweepWrap.appendChild(controls);
+
+      const visibleCount = Math.min(4, lyricsCards.length);
+      const cardEls = [];
+
+      function mkCard(text) {
+        const card = document.createElement("div");
+        card.style.position = "absolute";
+        card.style.left = "50%";
+        card.style.top = "0";
+        card.style.transform = "translateX(-50%)";
+        card.style.width = "100%";
+        card.style.maxWidth = "520px";
+        card.style.minHeight = "420px";
+
+        card.style.background = "linear-gradient(180deg, rgba(90,52,20,.88), rgba(180,120,60,.22))";
+        card.style.border = "1px solid rgba(255,210,160,.35)";
+        card.style.backdropFilter = "blur(10px)";
+        card.style.borderRadius = "22px";
+        card.style.padding = "18px 18px";
+        card.style.boxShadow = "0 0 36px rgba(200,137,76,.18)";
+        card.style.paddingBottom = "320px";
+        card.style.color = "#fff";
+        card.style.textAlign = "center";
+        card.style.textShadow = "0 0 18px rgba(0,0,0,.35)";
+
+        const content = document.createElement("div");
+        content.style.whiteSpace = "pre-line";
+        content.style.fontWeight = "900";
+        content.style.fontSize = "clamp(16px, 2.5vw, 26px)";
+        content.style.lineHeight = "1.25";
+        content.textContent = text;
+        // keep lyrics confined to the top area so bottom decorations never overlap
+        content.style.marginBottom = "52px";
+        card.appendChild(content);
+
+        // Add heart + math equation animations in the empty space area
+        const bottomDecor = document.createElement("div");
+        bottomDecor.style.position = "absolute";
+        bottomDecor.style.left = "50%";
+        bottomDecor.style.bottom = "14px";
+        bottomDecor.style.zIndex = "3";
+        bottomDecor.style.mixBlendMode = "normal";
+        bottomDecor.style.transform = "translateX(-50%)";
+        bottomDecor.style.width = "100%";
+        bottomDecor.style.textAlign = "center";
+        bottomDecor.style.pointerEvents = "none";
+
+        bottomDecor.innerHTML = `
+          <div style="width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+              <div style="width:100%; display:flex; justify-content:center;">
+              <canvas class="deck-graph" width="280" height="140" style="max-width:100%; border-radius:14px; background:rgba(255,255,255,.08); box-shadow:0 0 26px rgba(255,77,141,.12);"></canvas>
+            </div>
+            <div style="font-weight:1000; font-size:16px; opacity:.95; text-shadow:0 0 18px rgba(255,77,141,.25); margin-top:10px;">
+              (x^2+y^2-1)^3 - X^2Y^3 = 0
+            </div>
+
+            <!-- Decorative heart bar (lightweight, no heavy canvases) -->
+            <div class="deck-heart-fall" style="width:100%; display:flex; flex-direction:row; align-items:center; justify-content:center; gap:12px; margin-top:6px; min-height:44px; flex-wrap:nowrap;">
+              <div class="standing-heart" style="font-size:34px; line-height:1; filter: drop-shadow(0 0 18px rgba(255,77,141,.35));">❤</div>
+              <div style="height:2px; width:72%; background:linear-gradient(90deg, rgba(255,77,141,.0), rgba(255,77,141,.9), rgba(255,77,141,.0)); opacity:.85; border-radius:999px; overflow:hidden;">
+                <div class="beat-line" style="width:40%; height:100%; background:rgba(255,77,141,.95); transform:translateX(-120%); border-radius:999px; animation: beatSweep 1.05s ease-in-out infinite;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        card.appendChild(bottomDecor);
+
+        // spawn a few floating hearts only inside this card
+        // Position icons well inside the safe bottom area so they don't overlap lyrics
+        const fallHost = bottomDecor.querySelector(".deck-heart-fall");
+        // push the heart emojis further down so they never overlap lyrics/graph
+        fallHost.style.paddingTop = "30px";
+        fallHost.style.marginTop = "0";
+        // keep hearts centered inside the safe bottom area
+        fallHost.style.transform = "translateX(0px)";
+        const n = 6;
+        for (let i = 0; i < n; i++) {
+          const hf = document.createElement("span");
+          hf.textContent = Math.random() > 0.5 ? "❤" : "💗";
+          hf.style.display = "inline-block";
+          hf.style.position = "relative";
+          hf.style.margin = "0 6px";
+          hf.style.animation = `deckCardHeartFloat ${1.4 + Math.random() * 1.2}s ease-in-out ${Math.random() * 0.6}s infinite`;
+          hf.style.filter = "drop-shadow(0 0 12px rgba(255,77,141,.35))";
+          hf.style.opacity = "0.95";
+          hf.style.transform = `translateY(${Math.random() * 10}px)`;
+          fallHost.appendChild(hf);
+        }
+
+        // Draw the graph for this card
+        // (2D curve projected towards viewer + animated heart build)
+
+
+        // Remove heavy canvas graph rendering entirely (performance)
+        // We'll rely on the existing decorative hearts.
+        return card;
+      }
+
+      for (let i = 0; i < visibleCount; i++) {
+        const card = mkCard(lyricsCards[i]);
+        card.style.opacity = i === 0 ? "1" : String(0.85 - i * 0.12);
+        card.style.zIndex = String(100 - i);
+        card.style.transform = `translateX(-50%) translateY(${i * 18}px) rotate(${i * 1.4 - 2}deg)`;
+        deck.appendChild(card);
+        cardEls.push(card);
+      }
+
+      let headIndex = 0;
+
+      function renderStack() {
+        for (let i = 0; i < cardEls.length; i++) {
+          const dataIdx = headIndex + i;
+          const text = lyricsCards[dataIdx] ?? "";
+          const content = cardEls[i].firstChild;
+          if (content) content.textContent = text;
+
+          cardEls[i].style.opacity = i === 0 ? "1" : String(0.85 - i * 0.12);
+          cardEls[i].style.zIndex = String(100 - i);
+          cardEls[i].style.transition = "none";
+          cardEls[i].style.transform = `translateX(-50%) translateY(${i * 18}px) rotate(${i * 1.4 - 2}deg)`;
+
+
+        }
+      }
+
+      function shuffleNext() {
+        headIndex++;
+        if (headIndex >= lyricsCards.length) headIndex = 0; // loop deck
+
+        // No animation here; Next click handles the book-page turn.
+        // After animation ends, rerender positions/texts.
+        setTimeout(renderStack, 520);
+      }
+
+
+      // Card deck interaction (Next)
+      // Book-page animation on Next
+      function playBookPageAnim() {
+        // Animate the deck like a page-turn: rotate the top cards and slightly slide them.
+        const top = cardEls[0];
+        if (!top) return;
+
+        // Make sure transforms are applied relative to the top-center.
+        top.style.transformOrigin = "50% 0%";
+
+        // Create a quick "page turn" effect.
+        top.animate(
+          [
+            { transform: top.style.transform, filter: "brightness(1)" },
+            { transform: "translateX(-50%) translateY(10px) rotateX(55deg) rotateZ(-2deg)", filter: "brightness(1.12)" },
+            { transform: "translateX(-50%) translateY(0px) rotateX(0deg) rotateZ(0deg)", filter: "brightness(1)" },
+          ],
+          { duration: 520, easing: "ease-in-out", fill: "forwards" }
+        );
+
+        // A subtle shadow sweep for the whole deck.
+        deck.animate(
+          [
+            { filter: "drop-shadow(0 14px 25px rgba(0,0,0,0.12))" },
+            { filter: "drop-shadow(0 22px 38px rgba(0,0,0,0.18))" },
+            { filter: "drop-shadow(0 14px 25px rgba(0,0,0,0.12))" },
+          ],
+          { duration: 520, easing: "ease-in-out", fill: "forwards" }
+        );
+      }
+
+      nextBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        playBookPageAnim();
+        shuffleNext();
+      });
+
+      // Close overlay
+      closeBtn.addEventListener("click", () => {
+        const layerEl = document.getElementById("lyricsSweepLayer");
+        if (layerEl) layerEl.remove();
+        document.body.style.overflow = "";
+      });
+
+      // initial
+      renderStack();
+
+      // Ensure lyrics layer stays open until user finishes clicking next.
+      if (nextBtn.dataset.active !== "1") nextBtn.dataset.active = "1";
+
+      layer.appendChild(sweepWrap);
+
+      document.body.appendChild(layer);
+
+      // Keep the card deck visible while user clicks Next.
+      nextBtn.dataset.active = "1";
+    }
+
+
+
+    function spawnFallingHearts() {
+      const layer = document.getElementById("heartFallLayer");
+      const count = isLowPowerView ? 14 : 45;
+      const palette = ["#ff4d8d", "#ff86b3", "#fff0f5", "#ffd1dc", "#ff5e62"];
+
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement("div");
+        h.className = "heart-fall";
+        h.textContent = "❤";
+
+        const size = 14 + Math.random() * 18;
+        h.style.fontSize = size + "px";
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.color = palette[Math.floor(Math.random() * palette.length)];
+        h.style.setProperty("--dur", (isLowPowerView ? 1.6 + Math.random() * 1.2 : 1.2 + Math.random() * 1.4).toFixed(2) + "s");
+
+        layer.appendChild(h);
+        h.addEventListener("animationend", () => h.remove());
+      }
+    }
+
+    // ---- I LOVE YOU Catch-Game (after brick win) ----
+    const catchGame = {
+      active: false,
+      totalNeeded: 10,
+      caught: 0,
+      activeWindows: [],
+    };
+
+    function ensureCatchGameUI() {
+      if (document.getElementById("catchGameLayer")) return;
+
+      const layer = document.createElement("div");
+      layer.id = "catchGameLayer";
+      layer.style.position = "fixed";
+      layer.style.inset = "0";
+      layer.style.zIndex = "10001";
+      layer.style.pointerEvents = "none";
+      layer.style.overflow = "hidden";
+
+      layer.innerHTML = `
+        <div id="catchHud" style="position:absolute;left:50%;top:18px;transform:translateX(-50%);color:#fff;text-shadow:0 0 18px rgba(0,0,0,.35);font-weight:900;font-size:18px;pointer-events:none;opacity:.95">
+          Catch: <span id="catchCount">0</span>/<span id="catchTotal">${catchGame.totalNeeded}</span>
+        </div>
+        <div id="catchBin" style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);width:140px;height:54px;border-radius:16px;pointer-events:none;
+          background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);box-shadow:0 0 26px rgba(255,255,255,.14);
+        "></div>
+      `;
+
+      document.body.appendChild(layer);
+
+      // Move bin with mouse/touch
+      function moveBin(clientX) {
+        const bin = document.getElementById("catchBin");
+        if (!bin) return;
+        const w = bin.offsetWidth;
+        const x = clamp(clientX - w / 2, 10, window.innerWidth - w - 10);
+        bin.style.left = x + "px";
+        bin.style.transform = "none";
+      }
+
+      function onMove(e) {
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        moveBin(x);
+      }
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("touchmove", onMove, { passive: true });
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function startCatchGame() {
+      ensureCatchGameUI();
+      const layer = document.getElementById("catchGameLayer");
+      const countEl = document.getElementById("catchCount");
+
+      catchGame.active = true;
+      catchGame.caught = 0;
+      countEl.textContent = "0";
+
+      // clear old falling msgs
+      layer.querySelectorAll(".love-msg").forEach((n) => n.remove());
+
+      // spawn loop
+      let spawned = 0;
+      const maxSpawn = isLowPowerView ? 36 : 60; // enough to reach 10 catches
+
+      const spawnTimer = setInterval(() => {
+        if (!catchGame.active) {
+          clearInterval(spawnTimer);
+          return;
+        }
+        if (spawned >= maxSpawn) {
+          clearInterval(spawnTimer);
+          // if not reached, keep trying with more spawns
+          return;
+        }
+
+        spawned++;
+        spawnLoveFallingMsg();
+      }, isLowPowerView ? 650 : 450);
+
+      catchGame.activeWindows.push(spawnTimer);
+    }
+
+    function spawnLoveFallingMsg() {
+      const layer = document.getElementById("catchGameLayer");
+      const bin = document.getElementById("catchBin");
+      if (!layer || !bin) return;
+
+      const msg = document.createElement("div");
+      msg.className = "love-msg";
+      msg.textContent = "I LOVE YOU";
+      msg.style.position = "absolute";
+      msg.style.top = "-8vh";
+      msg.style.left = Math.random() * 100 + "vw";
+      msg.style.transform = "translateX(-50%)";
+      msg.style.whiteSpace = "nowrap";
+      msg.style.fontWeight = "1000";
+      msg.style.color = "#fff";
+      msg.style.textShadow = "0 0 22px rgba(255,255,255,.45)";
+      msg.style.fontSize = "clamp(14px, 2.8vw, 34px)";
+      msg.style.pointerEvents = "auto";
+      msg.style.userSelect = "none";
+      msg.style.padding = "8px 14px";
+      msg.style.borderRadius = "999px";
+      msg.style.border = "1px solid rgba(255,255,255,.22)";
+      msg.style.background = "rgba(255,255,255,.10)";
+      msg.style.boxShadow = "0 0 30px rgba(255,77,141,.18)";
+
+      const duration = 2400 + Math.random() * 1200;
+      const drift = (Math.random() - 0.5) * 120;
+
+      msg.animate(
+        [
+          { transform: "translate(-50%, 0) rotate(-8deg)", opacity: 0.98 },
+          {
+            transform: `translate(-50%, ${window.innerHeight}px) rotate(14deg) translateX(${drift}px)`,
+            opacity: 0,
+          },
+        ],
+        { duration, easing: "linear", fill: "forwards" },
+      );
+
+      layer.appendChild(msg);
+
+      // Catch check on interval
+      const check = setInterval(() => {
+        if (!catchGame.active) {
+          clearInterval(check);
+          return;
+        }
+        const mRect = msg.getBoundingClientRect();
+        const bRect = bin.getBoundingClientRect();
+        const overlap =
+          mRect.left < bRect.right &&
+          mRect.right > bRect.left &&
+          mRect.top < bRect.bottom &&
+          mRect.bottom > bRect.top;
+
+        if (overlap) {
+          clearInterval(check);
+          if (msg.parentElement) msg.remove();
+          catchGame.caught++;
+          document.getElementById("catchCount").textContent = String(catchGame.caught);
+          triggerCatchRewardBurst();
+
+          if (catchGame.caught >= catchGame.totalNeeded) {
+            winCatchRewards();
+          }
+        }
+      }, isLowPowerView ? 120 : 70);
+
+      msg.addEventListener("animationend", () => {
+        clearInterval(check);
+        if (msg.parentElement) msg.remove();
+      });
+    }
+
+    function triggerCatchRewardBurst() {
+      const layer = document.getElementById("catchGameLayer");
+      if (!layer) return;
+
+      // small random hearts + confetti-ish sparkles
+      for (let i = 0; i < (isLowPowerView ? 5 : 10); i++) {
+        const s = document.createElement("div");
+        s.textContent = Math.random() > 0.55 ? "❤" : "💖";
+        s.style.position = "absolute";
+        s.style.left = 50 + (Math.random() - 0.5) * 18 + "%";
+        s.style.top = "calc(100% - 70px)";
+        s.style.transform = "translate(-50%, -50%)";
+        s.style.color = Math.random() > 0.5 ? "#ff86b3" : "#fff";
+        s.style.fontSize = 14 + Math.random() * 18 + "px";
+        s.style.textShadow = "0 0 18px rgba(255,77,141,.35)";
+        s.style.pointerEvents = "none";
+        layer.appendChild(s);
+        s.animate(
+          [
+            { transform: "translate(-50%, -50%) scale(1)", opacity: 1 },
+            { transform: `translate(-50%, -120px) scale(${1.1 + Math.random() * 0.5})`, opacity: 0 },
+          ],
+          { duration: 700 + Math.random() * 400, easing: "ease-out", fill: "forwards" },
+        );
+        setTimeout(() => s.remove(), 1100);
+      }
+    }
+
+    function winCatchRewards() {
+      catchGame.active = false;
+      catchGame.activeWindows.forEach((t) => clearInterval(t));
+      catchGame.activeWindows = [];
+
+      const layer = document.getElementById("catchGameLayer");
+      if (layer) {
+        // keep it momentarily then hide
+        layer.style.opacity = "0";
+        setTimeout(() => {
+          layer.remove();
+        }, 450);
+      }
+
+      // Reveal rewards inside both message boxes
+      // Teddy + random hearts/fists (emoji)
+      const teddy = "🧸";
+      const fist = "👊";
+      const msgSet = ["You caught my love!", "My heart says yes!", "Forever vibes!", "We did it!"];
+      const randomHeartBurst = Math.random() > 0.5 ? "❤" : "💗";
+
+      function decorateBox(boxEl) {
+        if (!boxEl) return;
+        boxEl.classList.add("show");
+        boxEl.classList.remove("progress-anim");
+        void boxEl.offsetWidth;
+        boxEl.classList.add("progress-anim");
+
+        const p = boxEl.querySelector("p");
+        const extra = `
+          <div style="margin-top:14px; font-size:1.05rem; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
+            <span style="filter:drop-shadow(0 0 18px rgba(255,77,141,.35))">${teddy}</span>
+            <span style="color:#fff;">${randomHeartBurst}</span>
+            <span style="opacity:.95;">${msgSet[Math.floor(Math.random() * msgSet.length)]}</span>
+          </div>
+          <div style="margin-top:10px; font-size:34px; animation: pulse 1s infinite; text-align:center;">
+            <span style="display:inline-block; transform: rotate(${Math.floor(Math.random() * 18 - 9)}deg);">${fist}</span>
+            <span style="display:inline-block; margin-left:8px; transform: rotate(${Math.floor(Math.random() * 18 - 9)}deg);">${fist}</span>
+            <span style="display:inline-block; margin-left:8px; text-shadow:0 0 18px rgba(255,77,141,.35);">❤</span>
+          </div>
+          <div style="margin-top:12px; font-size:.98rem; opacity:.95; text-align:center;">
+            Unlocking my promise… (${catchGame.caught}/${catchGame.totalNeeded})
+          </div>
+        `;
+
+        if (p) p.insertAdjacentHTML("beforeend", extra);
+      }
+
+      decorateBox(hiddenBox);
+      decorateBox(acceptMsg);
+    }
+
+    acceptBtn.addEventListener("click", async () => {
+      const saved = await recordProposalResponse("accepted");
+      if (!saved && proposalId) return;
+
+      acceptMsg.classList.add("show");
+
+      // progress-bar-like light effect inside the opened message box
+      acceptMsg.classList.remove("progress-anim");
+      void acceptMsg.offsetWidth; // restart animation
+      acceptMsg.classList.add("progress-anim");
+
+      spawnFallingHearts();
+    });
+
+
+
+    function moveReject() {
+      const parent = rejectBtn.parentElement;
+      const maxX = parent.clientWidth - rejectBtn.offsetWidth - 10;
+      const maxY = parent.clientHeight - rejectBtn.offsetHeight - 10;
+
+      const x = Math.max(0, Math.random() * maxX);
+      const y = Math.max(0, Math.random() * maxY);
+
+      rejectBtn.style.left = x + "px";
+      rejectBtn.style.top = y + "px";
+    }
+
+    rejectBtn.addEventListener("mouseenter", moveReject);
+    rejectBtn.addEventListener("click", async () => {
+      await recordProposalResponse("rejected");
+      moveReject();
+    });
+
+    // Cap sparkles (avoid accumulating permanent animated DOM nodes)
+    // Mobile lag fix: spawn fewer sparkles on small screens and respect reduced motion.
+    (function () {
+      const isMobile = window.matchMedia && window.matchMedia("(max-width: 600px)").matches;
+      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const MAX_SPARKLES = reduced ? 0 : isMobile ? 2 : 8;
+      const SPARKLE_LIFETIME_MS = isMobile ? 5000 : 8000;
+
+      for (let i = 0; i < MAX_SPARKLES; i++) {
+        const s = document.createElement("div");
+        s.className = "sparkle";
+        s.style.left = Math.random() * 100 + "vw";
+        s.style.animationDuration = (4 + Math.random() * 4) + "s";
+        s.style.animationDelay = Math.random() * 3 + "s";
+        document.body.appendChild(s);
+        setTimeout(() => {
+          if (s && s.parentElement) s.remove();
+        }, SPARKLE_LIFETIME_MS);
+      }
+    })();
+
+
+
+    // ===== Web Heart Animation (converted from heartattack/py.py) =====
+    // (Removed for lag performance)
+    (function () {
+      return;
+      const wrap = document.getElementById("heartBelowGameWrap");
+      const canvas = document.getElementById("heartBelowGameCanvas");
+      if (!wrap || !canvas) return;
+
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const colors = [
+        "#ff0000",
+        "#ff1a1a",
+        "#ff3333",
+        "#ff4d4d",
+        "#ff6666",
+        "#ff8080",
+        "#ff4d4d",
+        "#ff3333",
+        "#ff1a1a",
+      ];
+
+      let W = 0;
+      let H = 0;
+      let dpr = window.devicePixelRatio || 1;
+
+      function resize() {
+        const rect = wrap.getBoundingClientRect();
+        W = Math.max(280, Math.floor(rect.width));
+        H = Math.max(220, Math.floor(rect.width * 0.55));
+        canvas.width = Math.floor(W * dpr);
+        canvas.height = Math.floor(H * dpr);
+        canvas.style.width = W + "px";
+        canvas.style.height = H + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+
+      function heart(t1) {
+        const x = 16 * Math.pow(Math.sin(t1), 3);
+        const y =
+          13 * Math.cos(t1) -
+          5 * Math.cos(2 * t1) -
+          2 * Math.cos(3 * t1) -
+          Math.cos(4 * t1);
+        return { x, y };
+      }
+
+      let scale = 15;
+      let grow = true;
+      const N = 420; // reduced from 628 for smoother performance
+      let last = 0;
+
+      function shouldPause() {
+        // Pause heavy redraw during lyrics overlay (big FPS saver)
+        return !!document.getElementById("lyricsSweepLayer");
+      }
+
+      function frame(ts) {
+        if (!last) last = ts;
+
+        // If lyrics overlay is open, stop redrawing (requestAnimationFrame still runs)
+        if (!shouldPause() && ts - last >= 30) {
+          last = ts;
+
+          ctx.clearRect(0, 0, W, H);
+
+          // background vignette
+          const grd = ctx.createRadialGradient(
+            W * 0.5,
+            H * 0.45,
+            20,
+            W * 0.5,
+            H * 0.45,
+            Math.max(W, H) * 0.7,
+          );
+          grd.addColorStop(0, "rgba(255,77,141,0.10)");
+          grd.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = grd;
+          ctx.fillRect(0, 0, W, H);
+
+          // scale pulse from turtle code
+          if (grow) {
+            scale += 0.25;
+            if (scale >= 18) grow = false;
+          } else {
+            scale -= 0.25;
+            if (scale <= 15) grow = true;
+          }
+
+          const cx = W / 2;
+          const cy = H / 2 + 10;
+          const s = Math.min(W, H) / 35; // pixel scale factor
+
+          ctx.lineWidth = 2;
+          ctx.lineCap = "round";
+
+          // Glowing lines
+          for (let i = 0; i < N; i++) {
+            const a = i * 0.01;
+            const p = heart(a);
+            const x = cx + p.x * scale * s;
+            const y = cy - p.y * scale * s;
+
+            // Reduced multi-stroke glow passes (from 10 to 6)
+            for (let j = 0; j < 6; j++) {
+              ctx.strokeStyle = colors[(i + j) % colors.length];
+              ctx.shadowColor = colors[(i + j) % colors.length];
+              ctx.shadowBlur = 10;
+              ctx.beginPath();
+              ctx.moveTo(cx, cy);
+              ctx.lineTo(x, y);
+              ctx.stroke();
+            }
+          }
+
+          // Outline (white)
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = "white";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i < N; i++) {
+            const a = i * 0.01;
+            const p = heart(a);
+            const x = cx + p.x * scale * s;
+            const y = cy - p.y * scale * s;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          // Text
+          ctx.fillStyle = "white";
+          ctx.shadowColor = "white";
+          ctx.shadowBlur = 0;
+          ctx.font = "800 26px 'Times New Roman', serif";
+          ctx.textAlign = "center";
+          ctx.fillText("❤ I Love You ❤", cx, cy + Math.max(H * 0.25, 20));
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      // Ensure it never affects the game below / above
+      canvas.style.pointerEvents = "none";
+      canvas.style.display = "block";
+      canvas.style.width = "100%";
+      canvas.style.borderRadius = "18px";
+      canvas.style.background = "rgba(255,255,255,0.05)";
+      canvas.style.boxShadow = "0 0 22px rgba(255,255,255,0.12)";
+
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+
+</html>
