@@ -67,6 +67,34 @@
       padding: 40px 18px 70px;
     }
 
+    .top-menu {
+      position: sticky;
+      top: 14px;
+      z-index: 1100;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 980px;
+      margin: 0 auto 20px;
+      padding: 0 10px;
+    }
+
+    .top-menu button {
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .section-target {
+      scroll-margin-top: 110px;
+    }
+
     .card {
       background: rgba(40, 10, 30, 0.28);
       border: 1px solid rgba(255, 255, 255, 0.22);
@@ -218,6 +246,204 @@
 
     .proposal-status a {
       color: #fff4a3;
+    }
+
+    .gallery-shell {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .gallery-passcode,
+    .gallery-upload {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.19);
+    }
+
+    .gallery-passcode-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(240px, 360px);
+      gap: 10px;
+      align-items: center;
+      justify-content: stretch;
+    }
+
+    .gallery-passcode-row input {
+      width: 100%;
+      min-width: 220px;
+    }
+
+    .gallery-passcode-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+      justify-items: stretch;
+      min-width: 0;
+    }
+
+    .gallery-passcode-actions button {
+      min-width: 0;
+      width: 100%;
+      white-space: nowrap;
+      padding-left: 18px;
+      padding-right: 18px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px),
+    (pointer: coarse) {
+      .gallery-passcode-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .gallery-passcode-actions {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 700px),
+    (pointer: coarse) {
+      .gallery-passcode-row {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-passcode-actions {
+        justify-content: center;
+      }
+    }
+
+    min-width: 120px;
+    }
+
+    .gallery-passcode input,
+    .gallery-upload input,
+    .gallery-upload textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #3b0c22;
+      font: inherit;
+      outline: none;
+    }
+
+    .gallery-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 10px;
+    }
+
+    .gallery-item {
+      background: rgba(255, 255, 255, 0.13);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .gallery-item .caption {
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      color: #fffdfd;
+      line-height: 1.6;
+    }
+
+    .gallery-item-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px 10px 10px;
+    }
+
+    .gallery-item-actions button {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .voice-shell {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .voice-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.19);
+    }
+
+    .voice-card audio {
+      width: 100%;
+      border-radius: 999px;
+    }
+
+    .voice-player {
+      display: grid;
+      gap: 8px;
+    }
+
+    .voice-play-btn {
+      justify-self: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .gallery-note {
+      text-align: center;
+      color: #fff4a3;
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+
+    .gallery-protection-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      background: rgba(20, 5, 14, 0.92);
+      color: #fff;
+      z-index: 1400;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.7;
+      backdrop-filter: blur(10px);
+    }
+
+    .gallery-blanked {
+      filter: blur(18px) brightness(0.15);
+      pointer-events: none;
+      user-select: none;
     }
 
     .heart {
@@ -481,6 +707,10 @@
         min-height: 86px;
       }
 
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
       p {
         font-size: 1rem;
         line-height: 1.75;
@@ -652,13 +882,17 @@
 
     .proposal-character {
       position: absolute;
-      bottom: 72px;
-      font-size: clamp(70px, 11vw, 120px);
-      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+      bottom: 54px;
+      width: clamp(90px, 15vw, 140px);
+      height: clamp(140px, 24vw, 220px);
       z-index: 2;
       animation-duration: 2.1s;
       animation-fill-mode: forwards;
       animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
     }
 
     .proposal-boy {
@@ -669,6 +903,129 @@
     .proposal-girl {
       right: -120px;
       animation-name: walkInRight;
+    }
+
+    .proposal-person {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px 999px 18px 18px;
+      background: linear-gradient(180deg, #fff1d8 0%, #e1b989 100%);
+      box-shadow: inset 0 -10px 18px rgba(0, 0, 0, 0.16);
+    }
+
+    .proposal-person::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 34px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: #2b1a12;
+      box-shadow: 0 0 0 6px #f7d3b0;
+    }
+
+    .proposal-person::after {
+      content: "";
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      width: 54px;
+      height: 56px;
+      transform: translateX(-50%);
+      border-radius: 24px 24px 14px 14px;
+      background: linear-gradient(180deg, #f7d3b0, #e1b989);
+    }
+
+    .proposal-boy .proposal-person {
+      background: linear-gradient(180deg, #f8ead7 0%, #b98b5c 100%);
+    }
+
+    .proposal-girl .proposal-person {
+      background: linear-gradient(180deg, #ffe8ea 0%, #d98aa2 100%);
+    }
+
+    .proposal-person .detail {
+      position: absolute;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 58px;
+      border-radius: 20px 20px 16px 16px;
+      border: 3px solid rgba(43, 26, 18, 0.18);
+      border-top: 0;
+    }
+
+    .proposal-boy .proposal-person .detail {
+      background: linear-gradient(180deg, #ffffff, #f2c28b);
+      height: 62px;
+    }
+
+    .proposal-girl .proposal-person .detail {
+      background: linear-gradient(180deg, #fff2f3, #f2a0b2);
+      height: 64px;
+    }
+
+    .proposal-arm {
+      position: absolute;
+      top: 74px;
+      width: 24px;
+      height: 64px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f7d3b0, #c8894c);
+      transform-origin: top center;
+    }
+
+    .proposal-boy .proposal-arm.left {
+      left: 16px;
+      transform: rotate(22deg);
+    }
+
+    .proposal-boy .proposal-arm.right {
+      right: 16px;
+      transform: rotate(-22deg);
+    }
+
+    .proposal-girl .proposal-arm.left {
+      left: 18px;
+      transform: rotate(14deg);
+    }
+
+    .proposal-girl .proposal-arm.right {
+      right: 18px;
+      transform: rotate(-14deg);
+    }
+
+    .proposal-leg {
+      position: absolute;
+      bottom: 0;
+      width: 18px;
+      height: 70px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #5a2f1f, #2f160d);
+      transform-origin: top center;
+    }
+
+    .proposal-boy .proposal-leg.left {
+      left: 38px;
+      transform: rotate(4deg);
+    }
+
+    .proposal-boy .proposal-leg.right {
+      right: 38px;
+      transform: rotate(-4deg);
+    }
+
+    .proposal-girl .proposal-leg.left {
+      left: 38px;
+      transform: rotate(2deg);
+    }
+
+    .proposal-girl .proposal-leg.right {
+      right: 38px;
+      transform: rotate(-2deg);
     }
 
     .proposal-boy.kneel {
@@ -683,7 +1040,15 @@
 
     @keyframes walkInLeft {
       0% {
-        transform: translateX(-20vw) scale(0.9);
+        transform: translateX(-24vw) scale(0.9);
+      }
+
+      30% {
+        transform: translateX(-4vw) scale(1);
+      }
+
+      70% {
+        transform: translateX(16vw) scale(1);
       }
 
       100% {
@@ -693,7 +1058,15 @@
 
     @keyframes walkInRight {
       0% {
-        transform: translateX(20vw) scale(0.9);
+        transform: translateX(24vw) scale(0.9);
+      }
+
+      30% {
+        transform: translateX(4vw) scale(1);
+      }
+
+      70% {
+        transform: translateX(-16vw) scale(1);
       }
 
       100% {
@@ -801,8 +1174,15 @@
 <body>
   <div class="overlay"></div>
 
+  <div class="top-menu">
+    <button class="menu-btn" data-section="homeSection" type="button">Home</button>
+    <button class="menu-btn" data-section="proposalSection" type="button">Create Unique Proposal</button>
+    <button class="menu-btn" data-section="gallerySection" type="button">Gallery</button>
+    <button class="menu-btn" data-section="referralSection" type="button">Referral</button>
+  </div>
+
   <div class="container">
-    <div class="card circling-glow sweep" id="sorryCard">
+    <div class="card circling-glow sweep section-target" id="homeSection">
       <h1><i>Hey, I Want To Tell You!</i></h1>
       <div id="deepestSorryWrap">
         <div id="deepestSorryDisplay" aria-live="polite">
@@ -865,7 +1245,7 @@
       </div>
     </div>
 
-    <div class="card circling-glow sweep" id="proposalCard">
+    <div class="card circling-glow sweep section-target" id="proposalSection">
       <h2><i>A Small Proposal</i></h2>
       <div id="proposalMessageWrap">
         <p id="proposalMessageText">
@@ -879,6 +1259,10 @@
           style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
           <button id="claimProposalSenderBtn" class="pink-btn" type="button">I'm the sender</button>
           <button id="editProposalBtn" class="green-btn" type="button" style="display:none;">Edit your message</button>
+        </div>
+        <div style="margin-top:10px; text-align:center;">
+          <a id="createYourOwnProposalLink" href="?sender=1" style="color:#f8d1e2; text-decoration:underline;">Create
+            your own proposal site</a>
         </div>
 
         <div id="proposalMessageEditor" style="display:none; margin-top:12px; text-align:center;">
@@ -915,7 +1299,74 @@
           From today, I want to be the reason behind your smile, your calm, and your beautiful little moments.
         </p>
       </div>
+
+      <div style="margin-top:16px; text-align:center;">
+        <a href="index.html?sender=1" style="color:#fff4a3; font-weight:700; text-decoration:none;">Create your own
+          proposal site</a>
+      </div>
     </div>
+
+    <div class="card circling-glow sweep section-target" id="gallerySection">
+      <h2><i>Private Gallery</i></h2>
+      <p class="gallery-note">Open this gallery with a private passcode. Photos are encrypted in your browser and
+        auto-delete after 5 minutes.</p>
+
+      <div class="gallery-shell">
+        <div id="galleryPasscodeSection" class="gallery-passcode" style="display:none;">
+          <div class="gallery-passcode-row">
+            <input id="galleryPasscodeSetup" type="password" placeholder="Create a private gallery passcode">
+            <div class="gallery-passcode-actions">
+              <button id="setGalleryPasscodeBtn" class="pink-btn glow-circling" type="button">Set Passcode</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-passcode">
+          <div class="gallery-passcode-row">
+            <input id="galleryPasscodeInput" type="password" placeholder="Enter the gallery passcode">
+            <div class="gallery-passcode-actions">
+              <button id="openGalleryBtn" class="green-btn glow-circling" type="button">Open Gallery</button>
+              <button id="closeGalleryBtn" class="green-btn glow-circling" type="button">Close Gallery</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="galleryStatus" class="gallery-note"></div>
+
+        <div id="galleryLockedContent" style="display:none;">
+          <div class="gallery-upload">
+            <input id="galleryUpload" type="file" accept="image/*,video/*" multiple>
+            <textarea id="galleryMemoryTextarea" rows="3"
+              placeholder="Write a private memory or note for this photo or video"></textarea>
+            <button id="saveGalleryBtn" class="pink-btn glow-circling" type="button">Securely Save Memories</button>
+          </div>
+          <div id="galleryGrid" class="gallery-grid"></div>
+
+          <div class="voice-shell">
+            <div class="voice-card">
+              <input id="voiceUpload" type="file" accept="audio/*" />
+              <textarea id="voiceNoteTextarea" rows="3" placeholder="Write a private voice note message"></textarea>
+              <button id="saveVoiceBtn" class="green-btn glow-circling" type="button">Send Voice Message</button>
+            </div>
+            <div id="voiceGrid" class="gallery-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card circling-glow sweep section-target" id="referralSection">
+      <h2><i>Referral</i></h2>
+      <p>Share this link with your loved one so they can open the proposal page and use the private gallery with the
+        same passcode.</p>
+      <div class="proposal-status" id="referralStatus"></div>
+      <div class="buttons" style="margin-top: 12px;">
+        <button class="pink-btn glow-circling" id="copyReferralBtn" type="button">Copy Your Proposal Link</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="galleryProtectionOverlay" class="gallery-protection-overlay" aria-live="polite">
+    Private gallery is hidden for privacy. Opening it again will restore the content.
   </div>
 
   <div id="heartFallLayer" aria-hidden="true"></div>
@@ -948,6 +1399,15 @@
 
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyieQYY360Go_8MZVHlp02syENMhZ93hIc2BQKV63BxPPXHwdwCHp3oV1o3idMtH2V/exec";
+
+    document.querySelectorAll('[data-section]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = document.getElementById(button.getAttribute('data-section'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
 
     const isLowPowerView = window.matchMedia && (
       window.matchMedia("(max-width: 700px)").matches ||
@@ -989,6 +1449,32 @@
     const acceptMsg = document.getElementById("acceptMsg");
     const bgMusic = document.getElementById("bgMusic");
     const proposalId = new URLSearchParams(window.location.search).get("proposal") || "";
+    const isSenderMode = new URLSearchParams(window.location.search).get("sender") === "1";
+    const galleryPasscodeSetup = document.getElementById("galleryPasscodeSetup");
+    const galleryPasscodeSection = document.getElementById("galleryPasscodeSection");
+    const galleryPasscodeInput = document.getElementById("galleryPasscodeInput");
+    const setGalleryPasscodeBtn = document.getElementById("setGalleryPasscodeBtn");
+    const closeGalleryBtn = document.getElementById("closeGalleryBtn");
+    const openGalleryBtn = document.getElementById("openGalleryBtn");
+    const galleryStatus = document.getElementById("galleryStatus");
+    const galleryLockedContent = document.getElementById("galleryLockedContent");
+    const galleryUpload = document.getElementById("galleryUpload");
+    const galleryMemoryTextarea = document.getElementById("galleryMemoryTextarea");
+    const saveGalleryBtn = document.getElementById("saveGalleryBtn");
+    const galleryGrid = document.getElementById("galleryGrid");
+    const voiceGrid = document.getElementById("voiceGrid");
+    const galleryProtectionOverlay = document.getElementById("galleryProtectionOverlay");
+    const voiceUpload = document.getElementById("voiceUpload");
+    const voiceNoteTextarea = document.getElementById("voiceNoteTextarea");
+    const saveVoiceBtn = document.getElementById("saveVoiceBtn");
+    const copyReferralBtn = document.getElementById("copyReferralBtn");
+    const referralStatus = document.getElementById("referralStatus");
+    const GALLERY_SECRET_KEY = "privateGalleryPasscode";
+    const GALLERY_ITEMS_KEY = "privateGalleryItems";
+    const VOICE_ITEMS_KEY = "privateVoiceItems";
+    const GALLERY_TTL_MS = 5 * 60 * 1000;
+    const SENDER_ONLY_KEY = "privateGallerySenderOnly";
+    const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
 
     function isBackendReady() {
       return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("PASTE_YOUR");
@@ -1011,8 +1497,286 @@
       return "sorryWithLoveSender_" + id;
     }
 
+    function getGalleryPasscode() {
+      return localStorage.getItem(GALLERY_SECRET_KEY) || "";
+    }
+
+    function setGalleryPasscode(passcode) {
+      localStorage.setItem(GALLERY_SECRET_KEY, passcode);
+    }
+
+    function encodeBase64(value) {
+      const binary = typeof value === "string" ? new TextEncoder().encode(value) : value;
+      let str = "";
+      binary.forEach((byte) => {
+        str += String.fromCharCode(byte);
+      });
+      return btoa(str);
+    }
+
+    function decodeBase64(value) {
+      const binary = atob(value);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+      return bytes;
+    }
+
+    async function deriveGalleryKey(passcode) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(passcode),
+        "PBKDF2",
+        false,
+        ["deriveKey"]
+      );
+      return crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: encoder.encode("sorry-with-love-gallery-v1"),
+          iterations: 250000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    async function encryptString(value, passcode) {
+      if (!window.crypto || !crypto.subtle) {
+        return { plain: value };
+      }
+      const encoder = new TextEncoder();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveGalleryKey(passcode);
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(value));
+      return {
+        iv: encodeBase64(iv),
+        data: encodeBase64(new Uint8Array(encrypted))
+      };
+    }
+
+    async function decryptString(payload, passcode) {
+      if (!payload || !window.crypto || !crypto.subtle) {
+        return payload && payload.plain ? payload.plain : "";
+      }
+      if (payload.plain) {
+        return payload.plain;
+      }
+      const key = await deriveGalleryKey(passcode);
+      const iv = decodeBase64(payload.iv);
+      const data = decodeBase64(payload.data);
+      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+      return new TextDecoder().decode(decrypted);
+    }
+
+    function getGalleryItems() {
+      const raw = localStorage.getItem(GALLERY_ITEMS_KEY);
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveGalleryItems(items) {
+      localStorage.setItem(GALLERY_ITEMS_KEY, JSON.stringify(items));
+    }
+
+    function getVoiceItems() {
+      const raw = localStorage.getItem(VOICE_ITEMS_KEY);
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveVoiceItems(items) {
+      localStorage.setItem(VOICE_ITEMS_KEY, JSON.stringify(items));
+    }
+
+    function purgeExpiredGalleryItems() {
+      const items = getGalleryItems();
+      const now = Date.now();
+      const activeItems = items.filter((item) => (item.expiresAt || 0) > now);
+      if (activeItems.length !== items.length) {
+        saveGalleryItems(activeItems);
+      }
+      return activeItems;
+    }
+
+    function purgeExpiredVoiceItems() {
+      const items = getVoiceItems();
+      const now = Date.now();
+      const activeItems = items.filter((item) => (item.expiresAt || 0) > now);
+      if (activeItems.length !== items.length) {
+        saveVoiceItems(activeItems);
+      }
+      return activeItems;
+    }
+
+    async function renderGalleryItems() {
+      const items = purgeExpiredGalleryItems();
+      if (!items.length) {
+        galleryGrid.innerHTML = '<div class="gallery-note">No private memories yet. Upload one and it will disappear after 5 minutes.</div>';
+        return;
+      }
+      const passcode = getGalleryPasscode();
+      if (!passcode) {
+        galleryGrid.innerHTML = '<div class="gallery-note">Set and unlock the gallery with a passcode to view private memories.</div>';
+        return;
+      }
+      const visibleItems = [];
+      for (const item of items) {
+        try {
+          const mediaData = await decryptString(item.mediaData, passcode);
+          const memory = item.memory ? await decryptString(item.memory, passcode) : "";
+          visibleItems.push({ mediaData, memory, kind: item.kind || 'image' });
+        } catch (error) {
+          // Skip unreadable item if the passcode changes or the data is invalid.
+        }
+      }
+      if (!visibleItems.length) {
+        galleryGrid.innerHTML = '<div class="gallery-note">No private memories can be shown right now. Try again after unlocking the gallery.</div>';
+        return;
+      }
+      galleryGrid.innerHTML = visibleItems.map((item, index) => `
+        <div class="gallery-item">
+          ${item.kind === 'video'
+          ? `<video controls preload="metadata" src="${item.mediaData}"></video>`
+          : `<img src="${item.mediaData}" alt="private memory">`}
+          <div class="caption">${(item.memory || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          <div class="gallery-item-actions">
+            <button type="button" data-delete-gallery="${index}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      galleryGrid.querySelectorAll('[data-delete-gallery]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const itemIndex = Number(button.getAttribute('data-delete-gallery'));
+          const currentItems = getGalleryItems();
+          currentItems.splice(itemIndex, 1);
+          saveGalleryItems(currentItems);
+          renderGalleryItems();
+        });
+      });
+    }
+
+    async function renderVoiceItems() {
+      const items = purgeExpiredVoiceItems();
+      if (!items.length) {
+        voiceGrid.innerHTML = '<div class="gallery-note">No private voice messages yet.</div>';
+        return;
+      }
+      const passcode = getGalleryPasscode();
+      if (!passcode) {
+        voiceGrid.innerHTML = '<div class="gallery-note">Unlock the gallery with the same passcode to listen to voice messages.</div>';
+        return;
+      }
+      const visibleItems = [];
+      for (const item of items) {
+        try {
+          const note = item.note ? await decryptString(item.note, passcode) : "";
+          const audioData = await decryptString(item.audioData, passcode);
+          visibleItems.push({ note, audioData, id: item.id });
+        } catch (error) {
+          // Skip unreadable item if the passcode changes or the data is invalid.
+        }
+      }
+      if (!visibleItems.length) {
+        voiceGrid.innerHTML = '<div class="gallery-note">No voice messages can be shown right now.</div>';
+        return;
+      }
+      voiceGrid.innerHTML = visibleItems.map((item) => `
+        <div class="gallery-item">
+          <div class="voice-player">
+            <audio controls preload="auto" playsinline src="${item.audioData}"></audio>
+            <button type="button" class="voice-play-btn" data-play-voice="${item.id}">Play voice message</button>
+          </div>
+          <div class="caption">${(item.note || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          <div class="gallery-item-actions">
+            <button type="button" data-delete-voice="${item.id}">Delete</button>
+          </div>
+        </div>
+      `).join('');
+      voiceGrid.querySelectorAll('[data-play-voice]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const voiceId = button.getAttribute('data-play-voice');
+          const audio = voiceGrid.querySelector(`audio[src="${visibleItems.find((item) => item.id === voiceId)?.audioData || ''}"]`);
+          if (audio) {
+            audio.play().catch(() => { });
+          }
+        });
+      });
+      voiceGrid.querySelectorAll('[data-delete-voice]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const id = button.getAttribute('data-delete-voice');
+          saveVoiceItems(getVoiceItems().filter((item) => item.id !== id));
+          renderVoiceItems();
+        });
+      });
+    }
+
     function isOwnProposalLink() {
       return proposalId && localStorage.getItem(senderStorageKey(proposalId)) === "1";
+    }
+
+    function showGalleryMessage(message, isError = false) {
+      galleryStatus.textContent = message;
+      galleryStatus.style.color = isError ? '#ffd6de' : '#fff4a3';
+    }
+
+    function updateGalleryAccess() {
+      if (galleryPasscodeSection) {
+        galleryPasscodeSection.style.display = isSenderMode ? 'grid' : 'none';
+      }
+      if (closeGalleryBtn) {
+        closeGalleryBtn.style.display = isSenderMode ? 'inline-flex' : 'none';
+      }
+    }
+
+    if (closeGalleryBtn) {
+      closeGalleryBtn.addEventListener('click', () => {
+        closeGalleryAfterUpload();
+      });
+    }
+
+    function closeGalleryAfterUpload() {
+      if (galleryLockedContent) {
+        galleryLockedContent.style.display = 'none';
+      }
+      if (galleryPasscodeInput) {
+        galleryPasscodeInput.value = '';
+      }
+      showGalleryMessage('Gallery closed after upload. Open it again with the passcode when needed.');
+    }
+
+    function blankGalleryForPrivacy(reason = "privacy") {
+      if (!galleryLockedContent) return;
+      galleryLockedContent.classList.add("gallery-blanked");
+      if (galleryProtectionOverlay) {
+        galleryProtectionOverlay.style.display = "flex";
+        galleryProtectionOverlay.textContent = reason === "capture"
+          ? "Private gallery hidden after a capture attempt."
+          : "Private gallery hidden for privacy.";
+      }
+    }
+
+    function restoreGalleryForPrivacy() {
+      if (!galleryLockedContent) return;
+      galleryLockedContent.classList.remove("gallery-blanked");
+      if (galleryProtectionOverlay) {
+        galleryProtectionOverlay.style.display = "none";
+      }
     }
 
     function proposalRequest(params) {
@@ -1068,6 +1832,183 @@
     }
 
     setProposalMode();
+    updateGalleryAccess();
+
+    window.addEventListener("blur", () => {
+      blankGalleryForPrivacy("privacy");
+    });
+
+    window.addEventListener("focus", () => {
+      restoreGalleryForPrivacy();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        blankGalleryForPrivacy("privacy");
+      } else {
+        restoreGalleryForPrivacy();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const key = event.key ? event.key.toLowerCase() : "";
+      const isCaptureCombo = event.key === "PrintScreen"
+        || (event.ctrlKey && key === "s")
+        || ((event.ctrlKey || event.metaKey) && (key === "shift" || key === "3" || key === "4"));
+      if (isCaptureCombo) {
+        event.preventDefault();
+        blankGalleryForPrivacy("capture");
+      }
+    });
+
+    setInterval(() => {
+      purgeExpiredGalleryItems();
+      purgeExpiredVoiceItems();
+      if (galleryLockedContent && galleryLockedContent.style.display === "block") {
+        renderGalleryItems();
+        renderVoiceItems();
+      }
+    }, 30000);
+
+    setGalleryPasscodeBtn.addEventListener("click", () => {
+      const passcode = (galleryPasscodeSetup.value || "").trim();
+      if (!passcode) {
+        showGalleryMessage("Please choose a private passcode first.", true);
+        return;
+      }
+      setGalleryPasscode(passcode);
+      galleryPasscodeSetup.value = "";
+      showGalleryMessage("Passcode saved. Use it to unlock the private gallery.");
+    });
+
+
+
+    openGalleryBtn.addEventListener("click", async () => {
+      const senderOnly = localStorage.getItem(SENDER_ONLY_KEY) === '1';
+      // If sender-only mode is enabled, only allow opening when in sender mode
+      if (senderOnly) {
+        if (!isSenderMode) {
+          showGalleryMessage("This gallery is currently set to sender-only.", true);
+          if (galleryLockedContent) galleryLockedContent.style.display = 'none';
+          return;
+        }
+        // sender may open without a passcode
+        if (galleryLockedContent) galleryLockedContent.style.display = 'block';
+        showGalleryMessage("Gallery opened in sender-only mode.");
+        await renderGalleryItems();
+        return;
+      }
+
+      const entered = (galleryPasscodeInput.value || "").trim();
+      const stored = getGalleryPasscode();
+      if (!stored) {
+        showGalleryMessage("Set a passcode first before opening the gallery.", true);
+        return;
+      }
+      if (entered !== stored) {
+        showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
+        if (galleryLockedContent) galleryLockedContent.style.display = "none";
+        return;
+      }
+      if (galleryLockedContent) galleryLockedContent.style.display = "block";
+      showGalleryMessage("Gallery unlocked. Your memories are only visible here.");
+      await renderGalleryItems();
+    });
+
+    saveGalleryBtn.addEventListener("click", async () => {
+      const files = Array.from(galleryUpload.files || []);
+      const memory = (galleryMemoryTextarea.value || "").trim();
+      if (!files.length) {
+        showGalleryMessage("Please choose at least one image to save.", true);
+        return;
+      }
+      const allowed = files.filter((file) => file && (file.type.startsWith("image/") || file.type.startsWith("video/")));
+      if (!allowed.length) {
+        showGalleryMessage("Only image or video files can be stored in the gallery.", true);
+        return;
+      }
+      const oversized = allowed.find((file) => file.size > MAX_MEDIA_BYTES);
+      if (oversized) {
+        showGalleryMessage("Each file must be 5 MB or smaller for safe private storage.", true);
+        return;
+      }
+      const passcode = getGalleryPasscode();
+      if (!passcode) {
+        showGalleryMessage("Set and unlock the gallery with a passcode before saving photos.", true);
+        return;
+      }
+      const items = getGalleryItems();
+      const promises = allowed.map((file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const encryptedMedia = await encryptString(reader.result, passcode);
+          const encryptedMemory = memory ? await encryptString(memory, passcode) : null;
+          resolve({
+            mediaData: encryptedMedia,
+            memory: encryptedMemory,
+            kind: file.type.startsWith("video/") ? "video" : "image",
+            createdAt: Date.now(),
+            expiresAt: Date.now() + GALLERY_TTL_MS,
+          });
+        };
+        reader.readAsDataURL(file);
+      }));
+      const newItems = await Promise.all(promises);
+      saveGalleryItems([...newItems, ...items].slice(0, 12));
+      galleryUpload.value = "";
+      galleryMemoryTextarea.value = "";
+      await renderGalleryItems();
+      closeGalleryAfterUpload();
+      showGalleryMessage("Private memories saved securely. They will auto-delete after 5 minutes.");
+    });
+
+    saveVoiceBtn.addEventListener("click", async () => {
+      const file = voiceUpload.files && voiceUpload.files[0];
+      const note = (voiceNoteTextarea.value || "").trim();
+      const passcode = getGalleryPasscode();
+      if (!file) {
+        showGalleryMessage("Please choose a voice message first.", true);
+        return;
+      }
+      if (!passcode) {
+        showGalleryMessage("Set and unlock the gallery with a passcode before saving voice messages.", true);
+        return;
+      }
+      if (file.size > MAX_MEDIA_BYTES) {
+        showGalleryMessage("Voice messages must be 5 MB or smaller.", true);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const encryptedAudio = await encryptString(reader.result, passcode);
+        const encryptedNote = note ? await encryptString(note, passcode) : null;
+        const items = getVoiceItems();
+        items.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          audioData: encryptedAudio,
+          note: encryptedNote,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + GALLERY_TTL_MS,
+        });
+        saveVoiceItems(items);
+        voiceUpload.value = "";
+        voiceNoteTextarea.value = "";
+        await renderVoiceItems();
+        closeGalleryAfterUpload();
+        showGalleryMessage("Voice message saved securely. It will delete after 5 minutes.");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    copyReferralBtn.addEventListener("click", async () => {
+      const link = window.location.href.split("?")[0] + "?sender=1";
+      try {
+        await navigator.clipboard.writeText(link);
+        referralStatus.textContent = "Proposal link copied. Share it with your loved one.";
+      } catch (error) {
+        referralStatus.textContent = "Copy failed. Use the address bar to share your link.";
+      }
+    });
 
     createProposalBtn.addEventListener("click", async () => {
       const senderName = document.getElementById("senderName").value;
@@ -1332,8 +2273,7 @@
 
         card.appendChild(bottomDecor);
 
-        // spawn a few floating hearts only inside this card
-        // Position icons well inside the safe bottom area so they don't overlap lyrics
+
         const fallHost = bottomDecor.querySelector(".deck-heart-fall");
         // push the heart emojis further down so they never overlap lyrics/graph
         fallHost.style.paddingTop = "30px";
@@ -1354,12 +2294,7 @@
           fallHost.appendChild(hf);
         }
 
-        // Draw the graph for this card
-        // (2D curve projected towards viewer + animated heart build)
 
-
-        // Remove heavy canvas graph rendering entirely (performance)
-        // We'll rely on the existing decorative hearts.
         return card;
       }
 
@@ -1530,8 +2465,24 @@
           <div class="proposal-card">
             <div class="proposal-rainbow"></div>
             <div class="proposal-text">Will you marry me?</div>
-            <div class="proposal-character proposal-boy">🧑‍🦱</div>
-            <div class="proposal-character proposal-girl">👩‍🦰</div>
+            <div class="proposal-character proposal-boy">
+              <div class="proposal-person">
+                <div class="detail"></div>
+              </div>
+              <div class="proposal-arm left"></div>
+              <div class="proposal-arm right"></div>
+              <div class="proposal-leg left"></div>
+              <div class="proposal-leg right"></div>
+            </div>
+            <div class="proposal-character proposal-girl">
+              <div class="proposal-person">
+                <div class="detail"></div>
+              </div>
+              <div class="proposal-arm left"></div>
+              <div class="proposal-arm right"></div>
+              <div class="proposal-leg left"></div>
+              <div class="proposal-leg right"></div>
+            </div>
           </div>
         </div>
       `;
@@ -2054,6 +3005,10 @@
         return localStorage.getItem(SENDER_KEY) === '1';
       }
 
+      function senderActive() {
+        return isSender() || isSenderMode;
+      }
+
       function renderMessage(text, persist = false) {
         const clean = (text || '').trim();
         const finalText = clean ? clean.replace(/\n/g, '<br>') : defaultMessage;
@@ -2074,7 +3029,7 @@
       }
 
       function updateControls() {
-        if (isSender()) {
+        if (senderActive()) {
           editBtn.style.display = 'inline-block';
           claimBtn.style.display = 'none';
         } else {
@@ -2090,14 +3045,14 @@
       });
 
       editBtn.addEventListener('click', () => {
-        if (!isSender()) return;
+        if (!senderActive()) return;
         textarea.value = msgP.innerText.replace('❤', '').trim();
         editorWrap.style.display = 'block';
         editBtn.disabled = true;
       });
 
       saveBtn.addEventListener('click', () => {
-        if (!isSender()) return;
+        if (!senderActive()) return;
         renderMessage(textarea.value, true);
         editorWrap.style.display = 'none';
         editBtn.disabled = false;
@@ -2130,6 +3085,10 @@
         return localStorage.getItem(SENDER_KEY) === '1';
       }
 
+      function senderActive() {
+        return isSender() || isSenderMode;
+      }
+
       function renderMessage(text, persist = false) {
         const clean = (text || '').trim();
         const finalText = clean ? clean.replace(/\n/g, '<br>') : defaultMessage;
@@ -2149,7 +3108,7 @@
       }
 
       function updateControls() {
-        if (isSender()) {
+        if (senderActive()) {
           editBtn.style.display = 'inline-block';
           claimBtn.style.display = 'none';
         } else {
@@ -2165,14 +3124,14 @@
       });
 
       editBtn.addEventListener('click', () => {
-        if (!isSender()) return;
+        if (!senderActive()) return;
         textarea.value = msgP.innerText.trim();
         editorWrap.style.display = 'block';
         editBtn.disabled = true;
       });
 
       saveBtn.addEventListener('click', () => {
-        if (!isSender()) return;
+        if (!senderActive()) return;
         renderMessage(textarea.value, true);
         editorWrap.style.display = 'none';
         editBtn.disabled = false;
