@@ -318,9 +318,6 @@
       }
     }
 
-    min-width: 120px;
-    }
-
     .gallery-passcode input,
     .gallery-upload input,
     .gallery-upload textarea {
@@ -1202,7 +1199,7 @@
 
         <div id="deepestSorryEditor" style="display:none; margin-top:12px; text-align:center;">
           <textarea id="deepestSorryTextarea" rows="6"
-            style="width:100%; max-width:720px; border-radius:12px; padding:12px; font-family:inherit; font-size:1rem;">""</textarea>
+            style="width:100%; max-width:720px; border-radius:12px; padding:12px; font-family:inherit; font-size:1rem;"></textarea>
           <div
             style="margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center;">
             <button id="saveSorryBtn" class="pink-btn" type="button">Save</button>
@@ -1224,13 +1221,13 @@
           Even when I make mistakes, my heart still chooses you every single time.
 
           <br><br>
-          You’re not just “someone”—you’re my calm, my courage, and my forever.
-          I’m sorry for the moments that made you doubt my love.
+          You're not just "someone"—you're my calm, my courage, and my forever.
+          I'm sorry for the moments that made you doubt my love.
 
           <br><br>
           <b>Sayari:</b><br>
-          “Tere bina lafz bhi khaamosh ho jaate hain…<br>
-          Main har ghalti ka ilaaj ban-na chahta hoon tere liye.”
+          "Tere bina lafz bhi khaamosh ho jaate hain…<br>
+          Main har ghalti ka ilaaj ban-na chahta hoon tere liye."
         </p>
       </div>
 
@@ -1473,6 +1470,7 @@
     const saveVoiceBtn = document.getElementById("saveVoiceBtn");
     const copyReferralBtn = document.getElementById("copyReferralBtn");
     const referralStatus = document.getElementById("referralStatus");
+
     function storageKey(key) {
       return latestProposalId ? `${key}_${latestProposalId}` : key;
     }
@@ -1507,8 +1505,8 @@
     }
 
     function proposalLinkFromId(id) {
-      const url = new URL(window.location.href);
-      url.search = "";
+      if (!id) return window.location.href.split('?')[0];
+      const url = new URL(window.location.href.split('?')[0], window.location.origin);
       url.searchParams.set("proposal", id);
       return url.toString();
     }
@@ -1700,7 +1698,7 @@
           ${item.kind === 'video'
           ? `<video controls preload="metadata" src="${item.mediaData}"></video>`
           : `<img src="${item.mediaData}" alt="private memory">`}
-          <div class="caption">${(item.memory || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          <div class="caption">${(item.memory || '').replace(/</g, '<').replace(/>/g, '>')}</div>
           <div class="gallery-item-actions">
             <button type="button" data-delete-gallery-id="${item.id}">Delete</button>
           </div>
@@ -1750,7 +1748,7 @@
             <audio controls preload="auto" playsinline data-voice-id="${item.id}" src="${item.audioData}"></audio>
             <button type="button" class="voice-play-btn" data-play-voice="${item.id}">Play voice message</button>
           </div>
-          <div class="caption">${(item.note || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          <div class="caption">${(item.note || '').replace(/</g, '<').replace(/>/g, '>')}</div>
           <div class="gallery-item-actions">
             <button type="button" data-delete-voice="${item.id}">Delete</button>
           </div>
@@ -1841,64 +1839,21 @@
       }
     }
 
-    function proposalRequest(params) {
-      return new Promise((resolve, reject) => {
-        if (!isBackendReady()) {
-          reject(new Error("Backend URL is not set yet."));
-          return;
-        }
-
-        const url = new URL(APPS_SCRIPT_URL);
-
-        Object.entries(params).forEach(([key, value]) => {
-          url.searchParams.set(key, value || "");
-        });
-
-        if (window.fetch) {
-          fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" })
-            .then(() => resolve({ ok: true }))
-            .catch(() => sendWithImage(url.toString(), resolve, reject));
-          return;
-        }
-
-        sendWithImage(url.toString(), resolve, reject);
-      });
-    }
-
-    function sendWithImage(url, resolve, reject) {
-      const img = new Image();
-      const done = () => resolve({ ok: true });
-      img.onload = done;
-      img.onerror = done;
-      img.src = url;
-      setTimeout(done, 1600);
-    }
-
     // Save message data to backend so receiver can see it
     async function saveMessageToBackend(key) {
       if (!proposalId) return;
       const value = localStorage.getItem(key);
       if (!value) return;
       try {
-        await proposalRequest({
-          action: "saveData",
-          id: proposalId,
-          dataKey: key,
-          dataValue: value,
-        });
+        const url = new URL(APPS_SCRIPT_URL);
+        url.searchParams.set("action", "saveData");
+        url.searchParams.set("id", proposalId);
+        url.searchParams.set("dataKey", key);
+        url.searchParams.set("dataValue", value);
+        fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" }).catch(() => { });
       } catch (e) {
         // Silently fail - data still available in localStorage
       }
-    }
-
-    // Load message data from backend (called on page load for receiver)
-    async function loadMessageFromBackend(key) {
-      if (!proposalId) return null;
-      // Since we use no-cors, we can't read response.
-      // Instead, check if data exists in localStorage first.
-      // The sender's data will be in localStorage if they used this browser.
-      // For cross-browser sync, backend would need CORS support.
-      return localStorage.getItem(key);
     }
 
     function setProposalMode() {
@@ -1913,7 +1868,12 @@
           rejectBtn.disabled = false;
           proposalResponseStatus.textContent = "";
         }
+        // Update the referral button to reflect the current proposal ID
+        if (copyReferralBtn) {
+          // Just enable it, the click handler will use the current proposalId
+        }
       } else {
+        proposalSetup.style.display = "";
         acceptBtn.disabled = true;
         rejectBtn.disabled = true;
         proposalResponseStatus.textContent = "Create a unique proposal link first, then send that link.";
@@ -1959,223 +1919,243 @@
       }
     }, 30000);
 
-    setGalleryPasscodeBtn.addEventListener("click", () => {
-      const passcode = (galleryPasscodeSetup.value || "").trim();
-      if (!passcode) {
-        showGalleryMessage("Please choose a private passcode first.", true);
-        return;
-      }
-      setGalleryPasscode(passcode);
-      galleryPasscodeSetup.value = "";
-      showGalleryMessage("Passcode saved. Use it to unlock the private gallery.");
-    });
-
-
-
-    openGalleryBtn.addEventListener("click", async () => {
-      const senderOnly = localStorage.getItem(getSenderOnlyKey()) === '1';
-      // If sender-only mode is enabled, only allow opening when in sender mode
-      if (senderOnly) {
-        if (!isSenderMode) {
-          showGalleryMessage("This gallery is currently set to sender-only.", true);
-          if (galleryLockedContent) galleryLockedContent.style.display = 'none';
+    if (setGalleryPasscodeBtn) {
+      setGalleryPasscodeBtn.addEventListener("click", () => {
+        const passcode = (galleryPasscodeSetup.value || "").trim();
+        if (!passcode) {
+          showGalleryMessage("Please choose a private passcode first.", true);
           return;
         }
-        // sender may open without a passcode
-        if (galleryLockedContent) galleryLockedContent.style.display = 'block';
-        showGalleryMessage("Gallery opened in sender-only mode.");
+        setGalleryPasscode(passcode);
+        galleryPasscodeSetup.value = "";
+        showGalleryMessage("Passcode saved. Use it to unlock the private gallery.");
+      });
+    }
+
+
+
+    if (openGalleryBtn) {
+      openGalleryBtn.addEventListener("click", async () => {
+        const senderOnly = localStorage.getItem(getSenderOnlyKey()) === '1';
+        // If sender-only mode is enabled, only allow opening when in sender mode
+        if (senderOnly) {
+          if (!isSenderMode) {
+            showGalleryMessage("This gallery is currently set to sender-only.", true);
+            if (galleryLockedContent) galleryLockedContent.style.display = 'none';
+            return;
+          }
+          // sender may open without a passcode
+          if (galleryLockedContent) galleryLockedContent.style.display = 'block';
+          showGalleryMessage("Gallery opened in sender-only mode.");
+          await renderGalleryItems();
+          return;
+        }
+
+        const entered = (galleryPasscodeInput.value || "").trim();
+        const stored = getGalleryPasscode();
+        if (!stored) {
+          showGalleryMessage("Set a passcode first before opening the gallery.", true);
+          return;
+        }
+        if (entered !== stored) {
+          showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
+          if (galleryLockedContent) galleryLockedContent.style.display = "none";
+          return;
+        }
+        if (galleryLockedContent) galleryLockedContent.style.display = "block";
+        showGalleryMessage("Gallery unlocked. Your memories are only visible here.");
         await renderGalleryItems();
-        return;
-      }
+      });
+    }
 
-      const entered = (galleryPasscodeInput.value || "").trim();
-      const stored = getGalleryPasscode();
-      if (!stored) {
-        showGalleryMessage("Set a passcode first before opening the gallery.", true);
-        return;
-      }
-      if (entered !== stored) {
-        showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
-        if (galleryLockedContent) galleryLockedContent.style.display = "none";
-        return;
-      }
-      if (galleryLockedContent) galleryLockedContent.style.display = "block";
-      showGalleryMessage("Gallery unlocked. Your memories are only visible here.");
-      await renderGalleryItems();
-    });
+    if (saveGalleryBtn) {
+      saveGalleryBtn.addEventListener("click", async () => {
+        const files = Array.from(galleryUpload.files || []);
+        const memory = (galleryMemoryTextarea.value || "").trim();
+        if (!files.length) {
+          showGalleryMessage("Please choose at least one image to save.", true);
+          return;
+        }
+        const allowed = files.filter((file) => file && (file.type.startsWith("image/") || file.type.startsWith("video/")));
+        if (!allowed.length) {
+          showGalleryMessage("Only image or video files can be stored in the gallery.", true);
+          return;
+        }
+        const oversized = allowed.find((file) => file.size > MAX_MEDIA_BYTES);
+        if (oversized) {
+          showGalleryMessage("Each file must be 5 MB or smaller for safe private storage.", true);
+          return;
+        }
+        const passcode = getGalleryPasscode();
+        if (!passcode) {
+          showGalleryMessage("Set and unlock the gallery with a passcode before saving photos.", true);
+          return;
+        }
+        const items = getGalleryItems();
+        const promises = allowed.map((file) => new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            const encryptedMedia = await encryptString(reader.result, passcode);
+            const encryptedMemory = memory ? await encryptString(memory, passcode) : null;
+            resolve({
+              id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              mediaData: encryptedMedia,
+              memory: encryptedMemory,
+              kind: file.type.startsWith("video/") ? "video" : "image",
+              createdAt: Date.now(),
+              expiresAt: Date.now() + GALLERY_TTL_MS,
+            });
+          };
+          reader.readAsDataURL(file);
+        }));
+        const newItems = await Promise.all(promises);
+        saveGalleryItems([...newItems, ...items].slice(0, 12));
+        galleryUpload.value = "";
+        galleryMemoryTextarea.value = "";
+        await renderGalleryItems();
+        closeGalleryAfterUpload();
+        showGalleryMessage("Private memories saved securely. They will auto-delete after 5 minutes.");
+      });
+    }
 
-    saveGalleryBtn.addEventListener("click", async () => {
-      const files = Array.from(galleryUpload.files || []);
-      const memory = (galleryMemoryTextarea.value || "").trim();
-      if (!files.length) {
-        showGalleryMessage("Please choose at least one image to save.", true);
-        return;
-      }
-      const allowed = files.filter((file) => file && (file.type.startsWith("image/") || file.type.startsWith("video/")));
-      if (!allowed.length) {
-        showGalleryMessage("Only image or video files can be stored in the gallery.", true);
-        return;
-      }
-      const oversized = allowed.find((file) => file.size > MAX_MEDIA_BYTES);
-      if (oversized) {
-        showGalleryMessage("Each file must be 5 MB or smaller for safe private storage.", true);
-        return;
-      }
-      const passcode = getGalleryPasscode();
-      if (!passcode) {
-        showGalleryMessage("Set and unlock the gallery with a passcode before saving photos.", true);
-        return;
-      }
-      const items = getGalleryItems();
-      const promises = allowed.map((file) => new Promise((resolve) => {
+    if (saveVoiceBtn) {
+      saveVoiceBtn.addEventListener("click", async () => {
+        const file = voiceUpload.files && voiceUpload.files[0];
+        const note = (voiceNoteTextarea.value || "").trim();
+        const passcode = getGalleryPasscode();
+        if (!file) {
+          showGalleryMessage("Please choose a voice message first.", true);
+          return;
+        }
+        if (!passcode) {
+          showGalleryMessage("Set and unlock the gallery with a passcode before saving voice messages.", true);
+          return;
+        }
+        if (file.size > MAX_MEDIA_BYTES) {
+          showGalleryMessage("Voice messages must be 5 MB or smaller.", true);
+          return;
+        }
         const reader = new FileReader();
         reader.onload = async () => {
-          const encryptedMedia = await encryptString(reader.result, passcode);
-          const encryptedMemory = memory ? await encryptString(memory, passcode) : null;
-          resolve({
+          const encryptedAudio = await encryptString(reader.result, passcode);
+          const encryptedNote = note ? await encryptString(note, passcode) : null;
+          const items = getVoiceItems();
+          items.push({
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            mediaData: encryptedMedia,
-            memory: encryptedMemory,
-            kind: file.type.startsWith("video/") ? "video" : "image",
+            audioData: encryptedAudio,
+            note: encryptedNote,
             createdAt: Date.now(),
             expiresAt: Date.now() + GALLERY_TTL_MS,
           });
+          saveVoiceItems(items);
+          voiceUpload.value = "";
+          voiceNoteTextarea.value = "";
+          await renderVoiceItems();
+          closeGalleryAfterUpload();
+          showGalleryMessage("Voice message saved securely. It will delete after 5 minutes.");
         };
         reader.readAsDataURL(file);
-      }));
-      const newItems = await Promise.all(promises);
-      saveGalleryItems([...newItems, ...items].slice(0, 12));
-      galleryUpload.value = "";
-      galleryMemoryTextarea.value = "";
-      await renderGalleryItems();
-      closeGalleryAfterUpload();
-      showGalleryMessage("Private memories saved securely. They will auto-delete after 5 minutes.");
-    });
+      });
+    }
 
-    saveVoiceBtn.addEventListener("click", async () => {
-      const file = voiceUpload.files && voiceUpload.files[0];
-      const note = (voiceNoteTextarea.value || "").trim();
-      const passcode = getGalleryPasscode();
-      if (!file) {
-        showGalleryMessage("Please choose a voice message first.", true);
-        return;
-      }
-      if (!passcode) {
-        showGalleryMessage("Set and unlock the gallery with a passcode before saving voice messages.", true);
-        return;
-      }
-      if (file.size > MAX_MEDIA_BYTES) {
-        showGalleryMessage("Voice messages must be 5 MB or smaller.", true);
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const encryptedAudio = await encryptString(reader.result, passcode);
-        const encryptedNote = note ? await encryptString(note, passcode) : null;
-        const items = getVoiceItems();
-        items.push({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          audioData: encryptedAudio,
-          note: encryptedNote,
-          createdAt: Date.now(),
-          expiresAt: Date.now() + GALLERY_TTL_MS,
-        });
-        saveVoiceItems(items);
-        voiceUpload.value = "";
-        voiceNoteTextarea.value = "";
-        await renderVoiceItems();
-        closeGalleryAfterUpload();
-        showGalleryMessage("Voice message saved securely. It will delete after 5 minutes.");
-      };
-      reader.readAsDataURL(file);
-    });
+    if (copyReferralBtn) {
+      copyReferralBtn.addEventListener("click", async () => {
+        const proposalLinkId = proposalId || latestProposalId;
+        if (!proposalLinkId) {
+          referralStatus.textContent = "Create a proposal first before copying the link.";
+          return;
+        }
+        const link = proposalLinkFromId(proposalLinkId);
+        try {
+          await navigator.clipboard.writeText(link);
+          referralStatus.textContent = "Proposal link copied. Share it with your loved one.";
+        } catch (error) {
+          referralStatus.textContent = "Copy failed. Use the address bar to share your link.";
+        }
+      });
+    }
 
-    copyReferralBtn.addEventListener("click", async () => {
-      const proposalLinkId = proposalId || latestProposalId;
-      if (!proposalLinkId) {
-        referralStatus.textContent = "Create a proposal first before copying the link.";
-        return;
-      }
-      const link = proposalLinkFromId(proposalLinkId);
-      try {
-        await navigator.clipboard.writeText(link);
-        referralStatus.textContent = "Proposal link copied. Share it with your loved one.";
-      } catch (error) {
-        referralStatus.textContent = "Copy failed. Use the address bar to share your link.";
-      }
-    });
+    if (createProposalBtn) {
+      createProposalBtn.addEventListener("click", async () => {
+        const senderName = document.getElementById("senderName").value;
+        const senderEmail = document.getElementById("senderEmail").value;
+        const recipientName = document.getElementById("recipientName").value;
 
-    createProposalBtn.addEventListener("click", async () => {
-      const senderName = document.getElementById("senderName").value;
-      const senderEmail = document.getElementById("senderEmail").value;
-      const recipientName = document.getElementById("recipientName").value;
+        createProposalBtn.disabled = true;
+        proposalCreateStatus.textContent = "Creating your private link...";
 
-      createProposalBtn.disabled = true;
-      proposalCreateStatus.textContent = "Creating your private link...";
+        try {
+          const id = makeProposalId();
+          const link = proposalLinkFromId(id);
+          localStorage.setItem(senderStorageKey(id), "1");
+          localStorage.setItem(PROPOSAL_HISTORY_KEY, id);
+          latestProposalId = id;
+          proposalId = id;
+          const newUrl = new URL(window.location.href.split('?')[0], window.location.origin);
+          newUrl.searchParams.set("proposal", id);
+          window.history.replaceState({}, "", newUrl.toString());
+          updateGalleryAccess();
+          setProposalMode();
 
-      try {
-        const id = makeProposalId();
-        const link = proposalLinkFromId(id);
-        localStorage.setItem(senderStorageKey(id), "1");
-        localStorage.setItem(PROPOSAL_HISTORY_KEY, id);
-        latestProposalId = id;
-        proposalId = id;
-        const newUrl = new URL(window.location.href);
-        newUrl.search = "";
-        newUrl.searchParams.set("proposal", id);
-        window.history.replaceState({}, "", newUrl.toString());
-        updateGalleryAccess();
+          // Send to backend if available
+          if (isBackendReady()) {
+            const url = new URL(APPS_SCRIPT_URL);
+            url.searchParams.set("action", "create");
+            url.searchParams.set("id", id);
+            url.searchParams.set("senderName", senderName);
+            url.searchParams.set("senderEmail", senderEmail);
+            url.searchParams.set("recipientName", recipientName);
+            fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" }).catch(() => { });
+          }
 
-        await proposalRequest({
-          action: "create",
-          id,
-          senderName,
-          senderEmail,
-          recipientName,
-        });
-
-        proposalCreateStatus.innerHTML = `Your unique link is ready:<br><a href="${link}">${link}</a>`;
-      } catch (error) {
-        proposalCreateStatus.textContent = error.message;
-      } finally {
-        createProposalBtn.disabled = false;
-      }
-    });
+          proposalCreateStatus.innerHTML = `Your unique link is ready:<br><a href="${link}" target="_blank">${link}</a>`;
+        } catch (error) {
+          proposalCreateStatus.textContent = error.message || "Could not create proposal link.";
+        } finally {
+          createProposalBtn.disabled = false;
+        }
+      });
+    }
 
     async function recordProposalResponse(choice) {
-      if (!proposalId) return false;
+      if (!proposalId) {
+        proposalResponseStatus.textContent = "No proposal ID found. Create a proposal link first.";
+        return false;
+      }
 
       proposalResponseStatus.textContent = "Sending your answer...";
 
       try {
-        const data = await proposalRequest({
-          action: "respond",
-          id: proposalId,
-          choice,
-          userAgent: navigator.userAgent,
-        });
-
-        if (!data.ok) throw new Error(data.error || "Could not save the answer.");
+        if (isBackendReady()) {
+          const url = new URL(APPS_SCRIPT_URL);
+          url.searchParams.set("action", "respond");
+          url.searchParams.set("id", proposalId);
+          url.searchParams.set("choice", choice);
+          url.searchParams.set("userAgent", navigator.userAgent);
+          await fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" });
+        }
 
         proposalResponseStatus.textContent = choice === "accepted"
           ? "Your yes has been sent."
           : "Your answer has been sent.";
         return true;
       } catch (error) {
-        proposalResponseStatus.textContent = error.message;
+        proposalResponseStatus.textContent = error.message || "Could not save the answer.";
         return false;
       }
     }
 
-    hiddenBtn.addEventListener("click", () => {
-      hiddenBox.classList.toggle("show");
+    if (hiddenBtn) {
+      hiddenBtn.addEventListener("click", () => {
+        hiddenBox.classList.toggle("show");
 
-      if (hiddenBox.classList.contains("show")) {
-        hiddenBox.classList.remove("progress-anim");
-        void hiddenBox.offsetWidth; // restart animation
-        hiddenBox.classList.add("progress-anim");
-      }
-    });
+        if (hiddenBox.classList.contains("show")) {
+          hiddenBox.classList.remove("progress-anim");
+          void hiddenBox.offsetWidth; // restart animation
+          hiddenBox.classList.add("progress-anim");
+        }
+      });
+    }
 
 
     function startMusic(showLyrics = true) {
@@ -2188,12 +2168,18 @@
 
     // If some other click triggers lyrics layer, block it.
     // This prevents the "card animation opening" glitch when clicking Accept.
-    document.getElementById("acceptBtn").addEventListener("click", (e) => {
-      const layerEl = document.getElementById("lyricsSweepLayer");
-      if (layerEl) layerEl.remove();
-    });
+    if (document.getElementById("acceptBtn")) {
+      document.getElementById("acceptBtn").addEventListener("click", (e) => {
+        const layerEl = document.getElementById("lyricsSweepLayer");
+        if (layerEl) layerEl.remove();
+      });
+    }
 
-    musicBtn.addEventListener("click", startMusic);
+    if (musicBtn) {
+      musicBtn.addEventListener("click", startMusic);
+    }
+
+    // Start music on first click but without lyrics
     document.addEventListener("click", () => {
       if (bgMusic.paused) startMusic(false);
     }, { once: true });
@@ -2874,20 +2860,22 @@
       decorateBox(acceptMsg);
     }
 
-    acceptBtn.addEventListener("click", async () => {
-      const saved = await recordProposalResponse("accepted");
-      if (!saved && proposalId) return;
+    if (acceptBtn) {
+      acceptBtn.addEventListener("click", async () => {
+        const saved = await recordProposalResponse("accepted");
+        if (!saved && proposalId) return;
 
-      acceptMsg.classList.add("show");
+        acceptMsg.classList.add("show");
 
-      // progress-bar-like light effect inside the opened message box
-      acceptMsg.classList.remove("progress-anim");
-      void acceptMsg.offsetWidth; // restart animation
-      acceptMsg.classList.add("progress-anim");
+        // progress-bar-like light effect inside the opened message box
+        acceptMsg.classList.remove("progress-anim");
+        void acceptMsg.offsetWidth; // restart animation
+        acceptMsg.classList.add("progress-anim");
 
-      spawnFallingHearts();
-      launchAcceptanceCelebration();
-    });
+        spawnFallingHearts();
+        launchAcceptanceCelebration();
+      });
+    }
 
 
 
@@ -2903,11 +2891,13 @@
       rejectBtn.style.top = y + "px";
     }
 
-    rejectBtn.addEventListener("mouseenter", moveReject);
-    rejectBtn.addEventListener("click", async () => {
-      await recordProposalResponse("rejected");
-      moveReject();
-    });
+    if (rejectBtn) {
+      rejectBtn.addEventListener("mouseenter", moveReject);
+      rejectBtn.addEventListener("click", async () => {
+        await recordProposalResponse("rejected");
+        moveReject();
+      });
+    }
 
     // Cap sparkles (avoid accumulating permanent animated DOM nodes)
     // Mobile lag fix: spawn fewer sparkles on small screens and respect reduced motion.
@@ -3142,34 +3132,42 @@
         }
       }
 
-      claimBtn.addEventListener('click', () => {
-        localStorage.setItem(SENDER_KEY, '1');
-        updateControls();
-        updateGalleryAccess();
-        editBtn.focus();
-        // Save message to backend so receiver can see it
-        saveMessageToBackend(storageKey('deepestSorry_message'));
-      });
+      if (claimBtn) {
+        claimBtn.addEventListener('click', () => {
+          localStorage.setItem(SENDER_KEY, '1');
+          updateControls();
+          updateGalleryAccess();
+          editBtn.focus();
+          // Save message to backend so receiver can see it
+          saveMessageToBackend(storageKey('deepestSorry_message'));
+        });
+      }
 
-      editBtn.addEventListener('click', () => {
-        if (!senderActive()) return;
-        textarea.value = msgP.innerText.replace('❤', '').trim();
-        editorWrap.style.display = 'block';
-        editBtn.disabled = true;
-      });
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          if (!senderActive()) return;
+          textarea.value = msgP.innerText.replace('❤', '').trim();
+          editorWrap.style.display = 'block';
+          editBtn.disabled = true;
+        });
+      }
 
-      saveBtn.addEventListener('click', () => {
-        if (!senderActive()) return;
-        renderMessage(textarea.value, true);
-        editorWrap.style.display = 'none';
-        editBtn.disabled = false;
-        saveMessageToBackend(MSG_KEY);
-      });
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          if (!senderActive()) return;
+          renderMessage(textarea.value, true);
+          editorWrap.style.display = 'none';
+          editBtn.disabled = false;
+          saveMessageToBackend(MSG_KEY);
+        });
+      }
 
-      cancelBtn.addEventListener('click', () => {
-        editorWrap.style.display = 'none';
-        editBtn.disabled = false;
-      });
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          editorWrap.style.display = 'none';
+          editBtn.disabled = false;
+        });
+      }
 
       loadMessage();
       updateControls();
@@ -3226,32 +3224,40 @@
         }
       }
 
-      claimBtn.addEventListener('click', () => {
-        localStorage.setItem(SENDER_KEY, '1');
-        updateControls();
-        updateGalleryAccess();
-        editBtn.focus();
-      });
+      if (claimBtn) {
+        claimBtn.addEventListener('click', () => {
+          localStorage.setItem(SENDER_KEY, '1');
+          updateControls();
+          updateGalleryAccess();
+          editBtn.focus();
+        });
+      }
 
-      editBtn.addEventListener('click', () => {
-        if (!senderActive()) return;
-        textarea.value = msgP.innerText.trim();
-        editorWrap.style.display = 'block';
-        editBtn.disabled = true;
-      });
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          if (!senderActive()) return;
+          textarea.value = msgP.innerText.trim();
+          editorWrap.style.display = 'block';
+          editBtn.disabled = true;
+        });
+      }
 
-      saveBtn.addEventListener('click', () => {
-        if (!senderActive()) return;
-        renderMessage(textarea.value, true);
-        editorWrap.style.display = 'none';
-        editBtn.disabled = false;
-        saveMessageToBackend(MSG_KEY);
-      });
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          if (!senderActive()) return;
+          renderMessage(textarea.value, true);
+          editorWrap.style.display = 'none';
+          editBtn.disabled = false;
+          saveMessageToBackend(MSG_KEY);
+        });
+      }
 
-      cancelBtn.addEventListener('click', () => {
-        editorWrap.style.display = 'none';
-        editBtn.disabled = false;
-      });
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          editorWrap.style.display = 'none';
+          editBtn.disabled = false;
+        });
+      }
 
       loadMessage();
       updateControls();
