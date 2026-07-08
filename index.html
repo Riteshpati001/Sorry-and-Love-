@@ -712,6 +712,14 @@
       return url.toString();
     }
 
+    function senderStorageKey(id) {
+      return "sorryWithLoveSender_" + id;
+    }
+
+    function isOwnProposalLink() {
+      return proposalId && localStorage.getItem(senderStorageKey(proposalId)) === "1";
+    }
+
     function proposalRequest(params) {
       return new Promise((resolve, reject) => {
         if (!isBackendReady()) {
@@ -748,9 +756,15 @@
     function setProposalMode() {
       if (proposalId) {
         proposalSetup.style.display = "none";
-        acceptBtn.disabled = false;
-        rejectBtn.disabled = false;
-        proposalResponseStatus.textContent = "";
+        if (isOwnProposalLink()) {
+          acceptBtn.disabled = true;
+          rejectBtn.disabled = true;
+          proposalResponseStatus.textContent = "This is your own proposal link. Send it to them; your browser cannot answer it.";
+        } else {
+          acceptBtn.disabled = false;
+          rejectBtn.disabled = false;
+          proposalResponseStatus.textContent = "";
+        }
       } else {
         acceptBtn.disabled = true;
         rejectBtn.disabled = true;
@@ -771,6 +785,7 @@
       try {
         const id = makeProposalId();
         const link = proposalLinkFromId(id);
+        localStorage.setItem(senderStorageKey(id), "1");
 
         await proposalRequest({
           action: "create",
