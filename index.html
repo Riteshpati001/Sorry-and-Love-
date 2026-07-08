@@ -1448,7 +1448,7 @@
 
     const acceptMsg = document.getElementById("acceptMsg");
     const bgMusic = document.getElementById("bgMusic");
-    const proposalId = new URLSearchParams(window.location.search).get("proposal") || "";
+    let proposalId = new URLSearchParams(window.location.search).get("proposal") || "";
     const isSenderMode = new URLSearchParams(window.location.search).get("sender") === "1";
     const PROPOSAL_HISTORY_KEY = "sorryWithLoveLastProposalId";
     let latestProposalId = proposalId || localStorage.getItem(PROPOSAL_HISTORY_KEY) || "";
@@ -1477,11 +1477,23 @@
       return latestProposalId ? `${key}_${latestProposalId}` : key;
     }
 
-    const GALLERY_SECRET_KEY = storageKey("privateGalleryPasscode");
-    const GALLERY_ITEMS_KEY = storageKey("privateGalleryItems");
-    const VOICE_ITEMS_KEY = storageKey("privateVoiceItems");
+    function getGallerySecretKey() {
+      return storageKey("privateGalleryPasscode");
+    }
+
+    function getGalleryItemsKey() {
+      return storageKey("privateGalleryItems");
+    }
+
+    function getVoiceItemsKey() {
+      return storageKey("privateVoiceItems");
+    }
+
+    function getSenderOnlyKey() {
+      return storageKey("privateGallerySenderOnly");
+    }
+
     const GALLERY_TTL_MS = 5 * 60 * 1000;
-    const SENDER_ONLY_KEY = storageKey("privateGallerySenderOnly");
     const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
 
     function isBackendReady() {
@@ -1505,12 +1517,36 @@
       return "sorryWithLoveSender_" + id;
     }
 
+    function migrateLegacyGalleryData() {
+      if (!proposalId) return;
+      const legacyKeys = {
+        passcode: "privateGalleryPasscode",
+        gallery: "privateGalleryItems",
+        voice: "privateVoiceItems",
+      };
+      Object.entries(legacyKeys).forEach(([key, legacyName]) => {
+        const targetName = storageKey(legacyName);
+        if (!localStorage.getItem(targetName) && localStorage.getItem(legacyName)) {
+          localStorage.setItem(targetName, localStorage.getItem(legacyName));
+        }
+      });
+      const legacySenderKeys = ["deepestSorry_sender", "proposalMessage_sender", "deepestSorry_message", "proposalMessage_message"];
+      legacySenderKeys.forEach((legacyName) => {
+        const targetName = storageKey(legacyName);
+        if (!localStorage.getItem(targetName) && localStorage.getItem(legacyName)) {
+          localStorage.setItem(targetName, localStorage.getItem(legacyName));
+        }
+      });
+    }
+
+    migrateLegacyGalleryData();
+
     function getGalleryPasscode() {
-      return localStorage.getItem(GALLERY_SECRET_KEY) || "";
+      return localStorage.getItem(getGallerySecretKey()) || "";
     }
 
     function setGalleryPasscode(passcode) {
-      localStorage.setItem(GALLERY_SECRET_KEY, passcode);
+      localStorage.setItem(getGallerySecretKey(), passcode);
     }
 
     function encodeBase64(value) {
@@ -1583,7 +1619,7 @@
     }
 
     function getGalleryItems() {
-      const raw = localStorage.getItem(GALLERY_ITEMS_KEY);
+      const raw = localStorage.getItem(getGalleryItemsKey());
       if (!raw) return [];
       try {
         const parsed = JSON.parse(raw);
@@ -1594,11 +1630,11 @@
     }
 
     function saveGalleryItems(items) {
-      localStorage.setItem(GALLERY_ITEMS_KEY, JSON.stringify(items));
+      localStorage.setItem(getGalleryItemsKey(), JSON.stringify(items));
     }
 
     function getVoiceItems() {
-      const raw = localStorage.getItem(VOICE_ITEMS_KEY);
+      const raw = localStorage.getItem(getVoiceItemsKey());
       if (!raw) return [];
       try {
         const parsed = JSON.parse(raw);
@@ -1609,7 +1645,7 @@
     }
 
     function saveVoiceItems(items) {
-      localStorage.setItem(VOICE_ITEMS_KEY, JSON.stringify(items));
+      localStorage.setItem(getVoiceItemsKey(), JSON.stringify(items));
     }
 
     function purgeExpiredGalleryItems() {
@@ -1743,11 +1779,10 @@
     }
 
     function isGallerySender() {
-      const senderProposalId = proposalId || latestProposalId;
       return isSenderMode
-        || localStorage.getItem("deepestSorry_sender") === "1"
-        || localStorage.getItem("proposalMessage_sender") === "1"
-        || (senderProposalId && localStorage.getItem(senderStorageKey(senderProposalId)) === "1");
+        || localStorage.getItem(storageKey('deepestSorry_sender')) === "1"
+        || localStorage.getItem(storageKey('proposalMessage_sender')) === "1"
+        || (proposalId && localStorage.getItem(senderStorageKey(proposalId)) === "1");
     }
 
     function showGalleryMessage(message, isError = false) {
@@ -1839,6 +1874,33 @@
       setTimeout(done, 1600);
     }
 
+    // Save message data to backend so receiver can see it
+    async function saveMessageToBackend(key) {
+      if (!proposalId) return;
+      const value = localStorage.getItem(key);
+      if (!value) return;
+      try {
+        await proposalRequest({
+          action: "saveData",
+          id: proposalId,
+          dataKey: key,
+          dataValue: value,
+        });
+      } catch (e) {
+        // Silently fail - data still available in localStorage
+      }
+    }
+
+    // Load message data from backend (called on page load for receiver)
+    async function loadMessageFromBackend(key) {
+      if (!proposalId) return null;
+      // Since we use no-cors, we can't read response.
+      // Instead, check if data exists in localStorage first.
+      // The sender's data will be in localStorage if they used this browser.
+      // For cross-browser sync, backend would need CORS support.
+      return localStorage.getItem(key);
+    }
+
     function setProposalMode() {
       if (proposalId) {
         proposalSetup.style.display = "none";
@@ -1911,7 +1973,7 @@
 
 
     openGalleryBtn.addEventListener("click", async () => {
-      const senderOnly = localStorage.getItem(SENDER_ONLY_KEY) === '1';
+      const senderOnly = localStorage.getItem(getSenderOnlyKey()) === '1';
       // If sender-only mode is enabled, only allow opening when in sender mode
       if (senderOnly) {
         if (!isSenderMode) {
@@ -2057,6 +2119,12 @@
         localStorage.setItem(senderStorageKey(id), "1");
         localStorage.setItem(PROPOSAL_HISTORY_KEY, id);
         latestProposalId = id;
+        proposalId = id;
+        const newUrl = new URL(window.location.href);
+        newUrl.search = "";
+        newUrl.searchParams.set("proposal", id);
+        window.history.replaceState({}, "", newUrl.toString());
+        updateGalleryAccess();
 
         await proposalRequest({
           action: "create",
@@ -3024,8 +3092,8 @@
 
     // --- Deepest Sorry editable message (sender-only edit) ---
     (function () {
-      const SENDER_KEY = 'deepestSorry_sender';
-      const MSG_KEY = 'deepestSorry_message';
+      const SENDER_KEY = storageKey('deepestSorry_sender');
+      const MSG_KEY = storageKey('deepestSorry_message');
       const defaultMessage = 'My heart still chooses you, even through all the silence and mistakes. I am sorry for every hurt, and I would love to love you with more patience, more care, and a gentler heart.';
 
       const claimBtn = document.getElementById('claimSenderBtn');
@@ -3041,7 +3109,7 @@
       }
 
       function senderActive() {
-        return isSender() || isSenderMode;
+        return isSender() || isSenderMode || (proposalId && localStorage.getItem(senderStorageKey(proposalId)) === '1');
       }
 
       function renderMessage(text, persist = false) {
@@ -3069,7 +3137,8 @@
           claimBtn.style.display = 'none';
         } else {
           editBtn.style.display = 'none';
-          claimBtn.style.display = 'inline-block';
+          // Hide "I'm the sender" button from receiver on a proposal link
+          claimBtn.style.display = proposalId ? 'none' : 'inline-block';
         }
       }
 
@@ -3078,6 +3147,8 @@
         updateControls();
         updateGalleryAccess();
         editBtn.focus();
+        // Save message to backend so receiver can see it
+        saveMessageToBackend(storageKey('deepestSorry_message'));
       });
 
       editBtn.addEventListener('click', () => {
@@ -3092,6 +3163,7 @@
         renderMessage(textarea.value, true);
         editorWrap.style.display = 'none';
         editBtn.disabled = false;
+        saveMessageToBackend(MSG_KEY);
       });
 
       cancelBtn.addEventListener('click', () => {
@@ -3105,8 +3177,8 @@
 
     // --- Proposal message editable box (sender-only edit) ---
     (function () {
-      const SENDER_KEY = 'proposalMessage_sender';
-      const MSG_KEY = 'proposalMessage_message';
+      const SENDER_KEY = storageKey('proposalMessage_sender');
+      const MSG_KEY = storageKey('proposalMessage_message');
       const defaultMessage = 'I do not want perfect words; I only want a real chance to love you better every day. If your heart is willing, I want to stay by your side through every smile, every silence, and every dream.';
 
       const claimBtn = document.getElementById('claimProposalSenderBtn');
@@ -3122,7 +3194,7 @@
       }
 
       function senderActive() {
-        return isSender() || isSenderMode;
+        return isSender() || isSenderMode || (proposalId && localStorage.getItem(senderStorageKey(proposalId)) === '1');
       }
 
       function renderMessage(text, persist = false) {
@@ -3149,7 +3221,8 @@
           claimBtn.style.display = 'none';
         } else {
           editBtn.style.display = 'none';
-          claimBtn.style.display = 'inline-block';
+          // Hide "I'm the sender" button from receiver on a proposal link
+          claimBtn.style.display = proposalId ? 'none' : 'inline-block';
         }
       }
 
@@ -3172,6 +3245,7 @@
         renderMessage(textarea.value, true);
         editorWrap.style.display = 'none';
         editBtn.disabled = false;
+        saveMessageToBackend(MSG_KEY);
       });
 
       cancelBtn.addEventListener('click', () => {
