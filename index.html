@@ -1095,29 +1095,111 @@
       position: absolute;
       left: 50%;
       bottom: 116px;
-      width: 24px;
-      height: 24px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #fff7c2, #ffd166);
-      border: 3px solid #fff;
-      box-shadow: 0 0 16px rgba(255, 209, 102, 0.9);
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 22%),
+        linear-gradient(135deg, #fff8c9, #ffd166 52%, #f4a261);
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 0 18px rgba(255, 209, 102, 0.9),
+        0 0 42px rgba(255, 244, 163, 0.35);
       z-index: 4;
-      animation: ringFly 1.1s ease-out forwards;
+      transform-origin: center;
+      animation: ringFly 1.45s cubic-bezier(.18, .9, .2, 1) forwards;
+      pointer-events: none;
+    }
+
+    .proposal-ring::before {
+      content: "";
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 5px solid rgba(255, 255, 255, 0.95);
+      background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(255, 209, 102, 0.22) 38%, rgba(255, 209, 102, 0) 60%);
+      box-shadow: inset 0 0 8px rgba(255, 209, 102, 0.45);
+    }
+
+    .proposal-ring::after {
+      content: "";
+      position: absolute;
+      top: 1px;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: linear-gradient(135deg, #ffffff, #b9f6ff);
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.95);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .proposal-ring.landed {
+      animation: ringLandingPulse 1.35s ease-in-out infinite;
+    }
+
+    .proposal-ring-spark {
+      position: absolute;
+      left: calc(50% + 124px);
+      bottom: 236px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ring-spark-color, #fff8c9);
+      box-shadow: 0 0 12px var(--ring-spark-color, #fff8c9);
+      z-index: 5;
+      pointer-events: none;
+      animation: ringSpark 0.8s ease-out forwards;
     }
 
     @keyframes ringFly {
       0% {
-        transform: translate(-50%, 0) scale(0.6);
+        transform: translate(-50%, 42px) scale(0.34) rotate(-55deg);
         opacity: 0;
       }
 
+      24% {
+        opacity: 1;
+      }
+
+      54% {
+        transform: translate(calc(-50% + 32px), -80px) scale(1.18) rotate(22deg);
+      }
+
+      78% {
+        transform: translate(calc(-50% + 102px), -126px) scale(0.92) rotate(-8deg);
+      }
+
+      100% {
+        transform: translate(calc(-50% + 124px), -118px) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes ringLandingPulse {
+      0%,
+      100% {
+        transform: translate(calc(-50% + 124px), -118px) scale(1);
+        box-shadow: 0 0 18px rgba(255, 209, 102, 0.9), 0 0 42px rgba(255, 244, 163, 0.35);
+      }
+
       50% {
+        transform: translate(calc(-50% + 124px), -118px) scale(1.08);
+        box-shadow: 0 0 28px rgba(255, 244, 163, 1), 0 0 60px rgba(255, 255, 255, 0.45);
+      }
+    }
+
+    @keyframes ringSpark {
+      0% {
+        transform: translate(-50%, 0) scale(0.35);
         opacity: 1;
       }
 
       100% {
-        transform: translate(-50%, -120px) scale(1);
-        opacity: 1;
+        transform: translate(calc(-50% + var(--rsx, 0px)), var(--rsy, -40px)) scale(0.05);
+        opacity: 0;
       }
     }
 
@@ -1646,6 +1728,18 @@
       return new TextDecoder().decode(decrypted);
     }
 
+    async function hashPasscode(passcode) {
+      const clean = (passcode || "").trim();
+      if (!clean) return "";
+      if (!window.crypto || !crypto.subtle) {
+        return btoa(unescape(encodeURIComponent(clean)));
+      }
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(clean));
+      return Array.from(new Uint8Array(digest))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
     function getGalleryItems() {
       const raw = localStorage.getItem(getGalleryItemsKey());
       if (!raw) return [];
@@ -1890,40 +1984,44 @@
 
     // Load messages, gallery media from backend when receiver opens the page
     // Uses JSONP because Google Apps Script doesn't support CORS
-    async function loadDataFromBackend() {
-      if (!proposalId || !isBackendReady()) return;
+    async function loadDataFromBackend(passcode = "") {
+      if (!proposalId || !isBackendReady()) return null;
       try {
+        const passcodeHash = passcode ? await hashPasscode(passcode) : "";
         const callbackName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         return new Promise((resolve) => {
+          let script;
           window[callbackName] = function (result) {
             delete window[callbackName];
-            if (document.head.contains(script)) {
+            if (script && document.head.contains(script)) {
               document.head.removeChild(script);
             }
             if (!result || !result.success) {
-              resolve();
+              resolve(result || null);
               return;
             }
-            processBackendData(result);
-            resolve();
+            Promise.resolve(processBackendData(result)).then(() => resolve(result));
           };
-          const script = document.createElement('script');
+          script = document.createElement('script');
           const url = new URL(APPS_SCRIPT_URL);
           url.searchParams.set("action", "getData");
           url.searchParams.set("id", proposalId);
+          if (passcodeHash) {
+            url.searchParams.set("passcodeHash", passcodeHash);
+          }
           url.searchParams.set("callback", callbackName);
           script.src = url.toString();
           script.onerror = () => {
             delete window[callbackName];
-            if (document.head.contains(script)) {
+            if (script && document.head.contains(script)) {
               document.head.removeChild(script);
             }
-            resolve();
+            resolve(null);
           };
           document.head.appendChild(script);
         });
       } catch (e) {
-        // Silently fail
+        return null;
       }
     }
 
@@ -2139,7 +2237,7 @@
     }, 30000);
 
     if (setGalleryPasscodeBtn) {
-      setGalleryPasscodeBtn.addEventListener("click", () => {
+      setGalleryPasscodeBtn.addEventListener("click", async () => {
         const passcode = (galleryPasscodeSetup.value || "").trim();
         if (!passcode) {
           showGalleryMessage("Please choose a private passcode first.", true);
@@ -2147,6 +2245,13 @@
         }
         setGalleryPasscode(passcode);
         galleryPasscodeSetup.value = "";
+        if (proposalId && isBackendReady()) {
+          await postToBackend({
+            action: "setPasscode",
+            id: proposalId,
+            passcodeHash: await hashPasscode(passcode)
+          });
+        }
         showGalleryMessage("Passcode saved. Use it to unlock the private gallery.");
       });
     }
@@ -2172,19 +2277,42 @@
 
         const entered = (galleryPasscodeInput.value || "").trim();
         const stored = getGalleryPasscode();
-        if (!stored) {
-          showGalleryMessage("Set a passcode first before opening the gallery.", true);
+        if (!entered) {
+          showGalleryMessage("Enter the private gallery passcode first.", true);
           return;
         }
-        if (entered !== stored) {
-          showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
-          if (galleryLockedContent) galleryLockedContent.style.display = "none";
-          return;
+
+        if (proposalId && isBackendReady()) {
+          showGalleryMessage("Checking passcode...");
+          const backendResult = await loadDataFromBackend(entered);
+          if (!backendResult) {
+            showGalleryMessage("Could not verify the passcode right now. Try again in a moment.", true);
+            return;
+          }
+          if (backendResult.passcodeRequired === false && !stored) {
+            showGalleryMessage("The sender has not saved a gallery passcode yet.", true);
+            return;
+          }
+          if (backendResult.passcodeValid === false || (backendResult.passcodeRequired && backendResult.passcodeValid !== true)) {
+            showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
+            if (galleryLockedContent) galleryLockedContent.style.display = "none";
+            return;
+          }
+        } else {
+          if (!stored) {
+            showGalleryMessage("Set a passcode first before opening the gallery.", true);
+            return;
+          }
+          if (entered !== stored) {
+            showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
+            if (galleryLockedContent) galleryLockedContent.style.display = "none";
+            return;
+          }
         }
+
+        setGalleryPasscode(entered);
         if (galleryLockedContent) galleryLockedContent.style.display = "block";
         showGalleryMessage("Gallery unlocked. Your memories are only visible here.");
-        // Load latest data from backend so receiver sees sender's uploaded media
-        await loadDataFromBackend();
         await renderGalleryItems();
         await renderVoiceItems();
       });
@@ -2240,6 +2368,7 @@
 
         // Upload each new gallery item to backend so receiver can see it
         if (proposalId && isBackendReady()) {
+          const passcodeHash = await hashPasscode(passcode);
           for (const item of newItems) {
             postToBackend({
               action: "saveMedia",
@@ -2247,7 +2376,9 @@
               dataKey: item.id,
               dataValue: JSON.stringify(item.mediaData),
               mediaType: item.kind === 'video' ? 'video' : 'image',
-              memory: item.memory
+              memory: item.memory ? JSON.stringify(item.memory) : "",
+              passcodeHash,
+              expiresAt: item.expiresAt
             });
           }
         }
@@ -2298,7 +2429,9 @@
               dataKey: items[items.length - 1].id,
               dataValue: JSON.stringify(encryptedAudio),
               mediaType: "audio",
-              memory: encryptedNote
+              memory: encryptedNote ? JSON.stringify(encryptedNote) : "",
+              passcodeHash: await hashPasscode(passcode),
+              expiresAt: items[items.length - 1].expiresAt
             });
           }
         };
@@ -2353,6 +2486,7 @@
             url.searchParams.set("senderName", senderName);
             url.searchParams.set("senderEmail", senderEmail);
             url.searchParams.set("recipientName", recipientName);
+            url.searchParams.set("proposalUrl", link);
             fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" }).catch(() => { });
           }
 
@@ -2380,6 +2514,7 @@
           url.searchParams.set("id", proposalId);
           url.searchParams.set("choice", choice);
           url.searchParams.set("userAgent", navigator.userAgent);
+          url.searchParams.set("pageUrl", window.location.href);
           await fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" });
         }
 
@@ -2845,21 +2980,25 @@
       }, 1200);
 
       setTimeout(() => {
+        const card = layer.querySelector(".proposal-card");
         const ring = document.createElement("div");
         ring.className = "proposal-ring";
-        ring.textContent = "💍";
-        ring.style.fontSize = "14px";
-        ring.style.textAlign = "center";
-        ring.style.lineHeight = "18px";
-        layer.querySelector(".proposal-card").appendChild(ring);
+        ring.setAttribute("aria-hidden", "true");
+        card.appendChild(ring);
+
         setTimeout(() => {
-          ring.style.left = "calc(50% + 124px)";
-          ring.style.bottom = "120px";
-          ring.style.transform = "translate(-50%, -50%)";
-          ring.style.animation = "none";
-          ring.style.boxShadow = "0 0 20px rgba(255, 209, 102, 0.95)";
-          ring.style.transition = "all 0.45s ease";
-        }, 180);
+          ring.classList.add("landed");
+          const sparkColors = ["#fff8c9", "#ffffff", "#ffd166", "#b9f6ff"];
+          for (let i = 0; i < 16; i++) {
+            const spark = document.createElement("div");
+            spark.className = "proposal-ring-spark";
+            spark.style.setProperty("--ring-spark-color", sparkColors[i % sparkColors.length]);
+            spark.style.setProperty("--rsx", (Math.random() * 90 - 45) + "px");
+            spark.style.setProperty("--rsy", (-20 - Math.random() * 70) + "px");
+            card.appendChild(spark);
+            setTimeout(() => spark.remove(), 850);
+          }
+        }, 1380);
       }, 1900);
 
       setTimeout(() => {
