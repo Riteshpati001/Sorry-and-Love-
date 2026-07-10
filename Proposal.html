@@ -1,0 +1,2890 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proposal Web</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", "Segoe UI", Tahoma, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: #fff;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 45%, #fad0c4 100%);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 24%),
+        radial-gradient(circle at 80% 30%, rgba(255, 182, 193, 0.35), transparent 22%),
+        radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.18), transparent 25%);
+      z-index: 0;
+      animation: drift 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.08);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .overlay,
+      .overlay *,
+      .card *,
+      .sparkle,
+      .heart-fall,
+      #heartFallLayer,
+      button.glow-circling::before,
+      button.glow-circling::after,
+      .sweep::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 18px 70px;
+    }
+
+    .top-menu {
+      position: sticky;
+      top: 14px;
+      z-index: 1100;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 980px;
+      margin: 0 auto 20px;
+      padding: 0 10px;
+    }
+
+    .top-menu button {
+      padding: 11px 16px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .section-target {
+      scroll-margin-top: 110px;
+    }
+
+    .card {
+      background: rgba(40, 10, 30, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(14px);
+      border-radius: 28px;
+      padding: 30px 24px;
+      margin-bottom: 24px;
+      animation: glow 3s ease-in-out infinite alternate;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card.circling-glow::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 30px;
+      background: conic-gradient(from 180deg, rgba(255, 77, 141, 0.0), rgba(255, 77, 141, 0.85),
+          rgba(254, 207, 239, 0.0), rgba(36, 217, 111, 0.55), rgba(255, 77, 141, 0.0));
+      filter: blur(10px);
+      opacity: 0.85;
+      animation: spinGlow 2.2s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .card.circling-glow>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes spinGlow {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.16);
+      }
+
+      to {
+        box-shadow: 0 0 34px rgba(255, 255, 255, 0.34);
+      }
+    }
+
+    .sweep::after {
+      content: "";
+      position: absolute;
+      inset: -40% -60%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 240, 245, 0.55),
+          rgba(36, 217, 111, 0.35), rgba(255, 255, 255, 0));
+      transform: rotate(18deg) translateX(-40%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+      animation: sweepMove 3.8s ease-in-out infinite;
+    }
+
+    @keyframes sweepMove {
+      0% {
+        opacity: 0;
+        transform: rotate(18deg) translateX(-55%);
+      }
+
+      15% {
+        opacity: 0.55;
+      }
+
+      55% {
+        opacity: 0.25;
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(18deg) translateX(55%);
+      }
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+      margin-bottom: 14px;
+      color: #fffafc;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+    }
+
+    p {
+      text-align: center;
+      line-height: 1.9;
+      font-size: 1.05rem;
+      color: #fffdfd;
+    }
+
+    .accent {
+      color: #fff4a3;
+      font-weight: 700;
+    }
+
+    .soft {
+      color: #ffeef7;
+    }
+
+    .proposal-setup {
+      display: grid;
+      gap: 12px;
+      max-width: 560px;
+      margin: 18px auto 0;
+    }
+
+    .proposal-setup input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #3b0c22;
+      font: inherit;
+      outline: none;
+    }
+
+    .proposal-setup input:focus {
+      box-shadow: 0 0 0 4px rgba(255, 244, 163, 0.28);
+    }
+
+    .proposal-status {
+      margin-top: 14px;
+      text-align: center;
+      color: #fff4a3;
+      font-weight: 800;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .proposal-status a {
+      color: #fff4a3;
+    }
+
+    .gallery-shell {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .gallery-passcode,
+    .gallery-upload {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.19);
+    }
+
+    .gallery-passcode-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(240px, 360px);
+      gap: 10px;
+      align-items: center;
+      justify-content: stretch;
+    }
+
+    .gallery-passcode-row input {
+      width: 100%;
+      min-width: 220px;
+    }
+
+    .gallery-passcode-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+      justify-items: stretch;
+      min-width: 0;
+    }
+
+    .gallery-passcode-actions button {
+      min-width: 0;
+      width: 100%;
+      white-space: nowrap;
+      padding-left: 18px;
+      padding-right: 18px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px),
+    (pointer: coarse) {
+      .gallery-passcode-row {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-passcode-actions {
+        justify-content: center;
+      }
+    }
+
+    .gallery-passcode input,
+    .gallery-upload input,
+    .gallery-upload textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #3b0c22;
+      font: inherit;
+      outline: none;
+    }
+
+    .gallery-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 10px;
+    }
+
+    .gallery-item {
+      background: rgba(255, 255, 255, 0.13);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .gallery-item .caption {
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      color: #fffdfd;
+      line-height: 1.6;
+    }
+
+    .gallery-item-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px 10px 10px;
+    }
+
+    .gallery-item-actions button {
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .voice-shell {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .voice-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.19);
+    }
+
+    .voice-card audio {
+      width: 100%;
+      border-radius: 999px;
+    }
+
+    .voice-player {
+      display: grid;
+      gap: 8px;
+    }
+
+    .voice-play-btn {
+      justify-self: center;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .gallery-note {
+      text-align: center;
+      color: #fff4a3;
+      font-size: 0.94rem;
+      line-height: 1.6;
+    }
+
+    .gallery-protection-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      background: rgba(20, 5, 14, 0.92);
+      color: #fff;
+      z-index: 1400;
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.7;
+      backdrop-filter: blur(10px);
+    }
+
+    .gallery-blanked {
+      filter: blur(18px) brightness(0.15);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .heart {
+      color: #fff0f5;
+      text-shadow: 0 0 14px #fff;
+      animation: pulse 1.3s infinite;
+      display: inline-block;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.22);
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      min-height: 100px;
+    }
+
+    button {
+      border: none;
+      outline: none;
+      padding: 14px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.25s ease;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    .pink-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #ff4d8d, #ff86b3);
+      box-shadow: 0 0 18px rgba(255, 77, 141, 0.8);
+    }
+
+    .green-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #24d96f, #69e39a);
+      box-shadow: 0 0 18px rgba(36, 217, 111, 0.75);
+    }
+
+    .red-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #ff5e62, #ff9966);
+      box-shadow: 0 0 18px rgba(255, 94, 98, 0.75);
+      position: absolute;
+      left: 55%;
+      top: 15px;
+    }
+
+    button.glow-circling {
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    button.glow-circling::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 999px;
+      background: conic-gradient(from 120deg, rgba(255, 255, 255, 0.0), rgba(255, 240, 245, 0.85),
+          rgba(255, 77, 141, 0.0), rgba(254, 207, 239, 0.55), rgba(36, 217, 111, 0.0), rgba(255, 240, 245, 0.0));
+      filter: blur(9px);
+      opacity: 0.9;
+      animation: spinGlow 1.9s linear infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    button.glow-circling::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      box-shadow: 0 0 24px rgba(255, 255, 255, 0.18);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .hidden-box {
+      display: none;
+      margin-top: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 20px;
+      padding: 18px 16px;
+      animation: fadeIn 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hidden-box.sweep-box::after {
+      content: "";
+      position: absolute;
+      inset: -60% -70%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 240, 245, 0.45),
+          rgba(36, 217, 111, 0.30), rgba(255, 255, 255, 0));
+      transform: rotate(18deg) translateX(-55%);
+      opacity: 0;
+      pointer-events: none;
+      animation: sweepMove 3.1s ease-in-out infinite;
+    }
+
+    .hidden-box p {
+      color: #fffafc;
+    }
+
+    .hidden-box.progress-anim::before {
+      content: "";
+      position: absolute;
+      left: -10%;
+      top: 0;
+      height: 4px;
+      width: 120%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 240, 245, 0.95),
+          rgba(36, 217, 111, 0.6), rgba(255, 255, 255, 0));
+      filter: blur(1px);
+      opacity: 0.95;
+      animation: progressGlow 1.25s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes progressGlow {
+      0% {
+        transform: translateX(-25%);
+        opacity: 0;
+      }
+
+      15% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(25%);
+        opacity: 0;
+      }
+    }
+
+    .show {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .music-status {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.92rem;
+      color: #fff8fb;
+      opacity: 1;
+    }
+
+    .sparkle {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 10px #fff;
+      opacity: 0.65;
+      z-index: 0;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      from {
+        transform: translateY(-10vh);
+      }
+
+      to {
+        transform: translateY(110vh);
+      }
+    }
+
+    @media (max-width: 700px),
+    (pointer: coarse) {
+      body {
+        background-attachment: scroll;
+      }
+
+      .overlay {
+        animation: none;
+        transform: none;
+      }
+
+      .container {
+        padding: 22px 12px 46px;
+      }
+
+      .card {
+        border-radius: 20px;
+        padding: 22px 16px;
+        animation: none;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.16);
+      }
+
+      .card.circling-glow::before,
+      button.glow-circling::before,
+      button.glow-circling::after,
+      .sweep::after,
+      .hidden-box.sweep-box::after {
+        animation: none;
+        opacity: 0.22;
+        filter: blur(5px);
+      }
+
+      .heart {
+        animation-duration: 2.4s;
+      }
+
+      button:hover {
+        transform: none;
+      }
+
+      .buttons {
+        min-height: 86px;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      p {
+        font-size: 1rem;
+        line-height: 1.75;
+      }
+    }
+
+    .audio-box {
+      width: 100%;
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .celebration-layer,
+    .proposal-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10003;
+      overflow: hidden;
+    }
+
+    .heart-rain {
+      position: absolute;
+      top: -8vh;
+      font-size: 22px;
+      color: #fff;
+      text-shadow: 0 0 14px rgba(255, 77, 141, 0.9);
+      animation: heartRain 2.4s linear forwards;
+      will-change: transform, opacity;
+    }
+
+    @keyframes heartRain {
+      0% {
+        transform: translate3d(0, 0, 0) scale(0.6);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate3d(var(--drift, 0px), 110vh, 0) scale(1.25);
+        opacity: 0;
+      }
+    }
+
+    .firework {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--fire-color);
+      box-shadow: 0 0 14px var(--fire-color);
+      animation: fireworkBurst 1.15s ease-out forwards;
+      opacity: 0.95;
+    }
+
+    @keyframes fireworkBurst {
+      0% {
+        transform: translate(0, 0) scale(0.3);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--burst-x), var(--burst-y)) scale(0.08);
+        opacity: 0;
+      }
+    }
+
+    .proposal-scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(7, 10, 28, 0.28);
+      backdrop-filter: blur(5px);
+    }
+
+    .proposal-card {
+      position: relative;
+      width: min(92vw, 800px);
+      height: min(74vh, 540px);
+      border-radius: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+      box-shadow: 0 0 38px rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .proposal-text {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      font-size: clamp(22px, 3.2vw, 34px);
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+      letter-spacing: 0.02em;
+      text-align: center;
+      width: min(80vw, 620px);
+      padding: 0 10px;
+      animation: proposalTextFade 1.4s ease-out forwards;
+    }
+
+    .proposal-sparkle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+      animation: sparkleFloat 1.4s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes sparkleFloat {
+      0% {
+        transform: translate(0, 0) scale(0.4);
+        opacity: 0;
+      }
+
+      40% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--sx), var(--sy)) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    @keyframes proposalTextFade {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(12px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .proposal-rainbow {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #ff5e7a, #ffca6b, #89f36a, #4dcbff, #8476ff, #ff65d9);
+      filter: blur(30px);
+      opacity: 0.65;
+      animation: rainbowShift 4s linear infinite;
+      transform: scale(1.08);
+    }
+
+    @keyframes rainbowShift {
+      0% {
+        transform: translateX(-8%) scale(1.08);
+      }
+
+      100% {
+        transform: translateX(8%) scale(1.08);
+      }
+    }
+
+    .proposal-character {
+      position: absolute;
+      bottom: 54px;
+      width: clamp(90px, 15vw, 140px);
+      height: clamp(140px, 24vw, 220px);
+      z-index: 2;
+      animation-duration: 2.1s;
+      animation-fill-mode: forwards;
+      animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+    }
+
+    .proposal-boy {
+      left: -120px;
+      animation-name: walkInLeft;
+    }
+
+    .proposal-girl {
+      right: -120px;
+      animation-name: walkInRight;
+    }
+
+    .proposal-person {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px 999px 18px 18px;
+      background: linear-gradient(180deg, #fff1d8 0%, #e1b989 100%);
+      box-shadow: inset 0 -10px 18px rgba(0, 0, 0, 0.16);
+    }
+
+    .proposal-person::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 34px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: #2b1a12;
+      box-shadow: 0 0 0 6px #f7d3b0;
+    }
+
+    .proposal-person::after {
+      content: "";
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      width: 54px;
+      height: 56px;
+      transform: translateX(-50%);
+      border-radius: 24px 24px 14px 14px;
+      background: linear-gradient(180deg, #f7d3b0, #e1b989);
+    }
+
+    .proposal-boy .proposal-person {
+      background: linear-gradient(180deg, #f8ead7 0%, #b98b5c 100%);
+    }
+
+    .proposal-girl .proposal-person {
+      background: linear-gradient(180deg, #ffe8ea 0%, #d98aa2 100%);
+    }
+
+    .proposal-person .detail {
+      position: absolute;
+      top: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 56px;
+      height: 58px;
+      border-radius: 20px 20px 16px 16px;
+      border: 3px solid rgba(43, 26, 18, 0.18);
+      border-top: 0;
+    }
+
+    .proposal-boy .proposal-person .detail {
+      background: linear-gradient(180deg, #ffffff, #f2c28b);
+      height: 62px;
+    }
+
+    .proposal-girl .proposal-person .detail {
+      background: linear-gradient(180deg, #fff2f3, #f2a0b2);
+      height: 64px;
+    }
+
+    .proposal-arm {
+      position: absolute;
+      top: 74px;
+      width: 24px;
+      height: 64px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #f7d3b0, #c8894c);
+      transform-origin: top center;
+    }
+
+    .proposal-boy .proposal-arm.left {
+      left: 16px;
+      transform: rotate(22deg);
+    }
+
+    .proposal-boy .proposal-arm.right {
+      right: 16px;
+      transform: rotate(-22deg);
+    }
+
+    .proposal-girl .proposal-arm.left {
+      left: 18px;
+      transform: rotate(14deg);
+    }
+
+    .proposal-girl .proposal-arm.right {
+      right: 18px;
+      transform: rotate(-14deg);
+    }
+
+    .proposal-leg {
+      position: absolute;
+      bottom: 0;
+      width: 18px;
+      height: 70px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #5a2f1f, #2f160d);
+      transform-origin: top center;
+    }
+
+    .proposal-boy .proposal-leg.left {
+      left: 38px;
+      transform: rotate(4deg);
+    }
+
+    .proposal-boy .proposal-leg.right {
+      right: 38px;
+      transform: rotate(-4deg);
+    }
+
+    .proposal-girl .proposal-leg.left {
+      left: 38px;
+      transform: rotate(2deg);
+    }
+
+    .proposal-girl .proposal-leg.right {
+      right: 38px;
+      transform: rotate(-2deg);
+    }
+
+    .proposal-boy.kneel {
+      animation-name: kneelDown;
+      animation-duration: 1s;
+    }
+
+    .proposal-girl.kneel {
+      animation-name: girlSmile;
+      animation-duration: 1s;
+    }
+
+    @keyframes walkInLeft {
+      0% {
+        transform: translateX(-24vw) scale(0.9);
+      }
+
+      30% {
+        transform: translateX(-4vw) scale(1);
+      }
+
+      70% {
+        transform: translateX(16vw) scale(1);
+      }
+
+      100% {
+        transform: translateX(24vw) scale(1);
+      }
+    }
+
+    @keyframes walkInRight {
+      0% {
+        transform: translateX(24vw) scale(0.9);
+      }
+
+      30% {
+        transform: translateX(4vw) scale(1);
+      }
+
+      70% {
+        transform: translateX(-16vw) scale(1);
+      }
+
+      100% {
+        transform: translateX(-24vw) scale(1);
+      }
+    }
+
+    @keyframes kneelDown {
+      0% {
+        transform: translateX(24vw) scale(1);
+      }
+
+      100% {
+        transform: translateX(24vw) translateY(10px) rotate(-10deg) scale(1);
+      }
+    }
+
+    @keyframes girlSmile {
+      0% {
+        transform: translateX(-24vw) scale(1);
+      }
+
+      100% {
+        transform: translateX(-24vw) translateY(-6px) scale(1);
+      }
+    }
+
+    .proposal-ring {
+      position: absolute;
+      left: 50%;
+      bottom: 116px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 22%),
+        linear-gradient(135deg, #fff8c9, #ffd166 52%, #f4a261);
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 18px rgba(255, 209, 102, 0.9), 0 0 42px rgba(255, 244, 163, 0.35);
+      z-index: 4;
+      transform-origin: center;
+      animation: ringFly 1.45s cubic-bezier(.18, .9, .2, 1) forwards;
+      pointer-events: none;
+    }
+
+    .proposal-ring::before {
+      content: "";
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 5px solid rgba(255, 255, 255, 0.95);
+      background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(255, 209, 102, 0.22) 38%, rgba(255, 209, 102, 0) 60%);
+      box-shadow: inset 0 0 8px rgba(255, 209, 102, 0.45);
+    }
+
+    .proposal-ring::after {
+      content: "";
+      position: absolute;
+      top: 1px;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: linear-gradient(135deg, #ffffff, #b9f6ff);
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.95);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .proposal-ring.landed {
+      animation: ringLandingPulse 1.35s ease-in-out infinite;
+    }
+
+    .proposal-ring-spark {
+      position: absolute;
+      left: calc(50% + 124px);
+      bottom: 236px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ring-spark-color, #fff8c9);
+      box-shadow: 0 0 12px var(--ring-spark-color, #fff8c9);
+      z-index: 5;
+      pointer-events: none;
+      animation: ringSpark 0.8s ease-out forwards;
+    }
+
+    @keyframes ringFly {
+      0% {
+        transform: translate(-50%, 42px) scale(0.34) rotate(-55deg);
+        opacity: 0;
+      }
+
+      24% {
+        opacity: 1;
+      }
+
+      54% {
+        transform: translate(calc(-50% + 32px), -80px) scale(1.18) rotate(22deg);
+      }
+
+      78% {
+        transform: translate(calc(-50% + 102px), -126px) scale(0.92) rotate(-8deg);
+      }
+
+      100% {
+        transform: translate(calc(-50% + 124px), -118px) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    @keyframes ringLandingPulse {
+
+      0%,
+      100% {
+        transform: translate(calc(-50% + 124px), -118px) scale(1);
+        box-shadow: 0 0 18px rgba(255, 209, 102, 0.9), 0 0 42px rgba(255, 244, 163, 0.35);
+      }
+
+      50% {
+        transform: translate(calc(-50% + 124px), -118px) scale(1.08);
+        box-shadow: 0 0 28px rgba(255, 244, 163, 1), 0 0 60px rgba(255, 255, 255, 0.45);
+      }
+    }
+
+    @keyframes ringSpark {
+      0% {
+        transform: translate(-50%, 0) scale(0.35);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(calc(-50% + var(--rsx, 0px)), var(--rsy, -40px)) scale(0.05);
+        opacity: 0;
+      }
+    }
+
+    #heartFallLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .heart-fall {
+      position: absolute;
+      top: -10vh;
+      font-size: 20px;
+      text-shadow: 0 0 14px rgba(255, 77, 141, 0.9);
+      animation: heartFall var(--dur, 1.7s) linear forwards;
+      will-change: transform, opacity;
+      opacity: 0.98;
+      filter: drop-shadow(0 0 8px rgba(255, 77, 141, 0.35));
+    }
+
+    @keyframes heartFall {
+      0% {
+        transform: translate3d(0, 0, 0) rotate(0deg);
+        opacity: 1;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate3d(0, 120vh, 0) rotate(220deg);
+        opacity: 0;
+      }
+    }
+
+    audio {
+      width: 100%;
+      max-width: 420px;
+      border-radius: 999px;
+      outline: none;
+    }
+
+    .msg-indicator {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #fff4a3;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .sender-badge {
+      display: inline-block;
+      background: rgba(255, 244, 163, 0.2);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      color: #fff4a3;
+      margin-left: 8px;
+    }
+
+    .auto-msg-badge {
+      display: inline-block;
+      background: rgba(255, 77, 141, 0.2);
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      color: #ff86b3;
+      margin-left: 8px;
+    }
+
+    .passcode-status {
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay"></div>
+
+  <div class="top-menu">
+    <button class="menu-btn" data-section="homeSection" type="button">Home</button>
+    <button class="menu-btn" data-section="proposalSection" type="button">Create Unique Proposal</button>
+    <button class="menu-btn" data-section="gallerySection" type="button">Gallery</button>
+    <button class="menu-btn" data-section="referralSection" type="button">Referral</button>
+  </div>
+
+  <div class="container">
+    <!-- ==================== HOME SECTION ==================== -->
+    <div class="card circling-glow sweep section-target" id="homeSection">
+      <h1><i>Hey, I Want To Tell You!</i></h1>
+      <div id="deepestSorryWrap">
+        <div id="deepestSorryDisplay" aria-live="polite">
+          <p id="deepestSorryMsg">
+            I am sorry for the times I failed to listen and act kindly. I want to learn and be better for you —
+            please let me show you how much I care.
+            <span class="heart">❤</span>
+          </p>
+          <div id="deepestSorryMsgMeta" class="msg-indicator"></div>
+        </div>
+
+        <div id="deepestSorryControls" style="display:flex;gap:10px;justify-content:center;margin-top:12px;">
+          <button id="claimSenderBtn" class="pink-btn" type="button" title="Claim sender on this browser">I'm the
+            sender</button>
+          <button id="editSorryBtn" class="green-btn" type="button" style="display:none;">Edit your message</button>
+          <button id="sendSorryBtn" class="green-btn" type="button" style="display:none;">Send this message</button>
+        </div>
+
+        <div id="deepestSorryEditor" style="display:none; margin-top:12px; text-align:center;">
+          <textarea id="deepestSorryTextarea" rows="6"
+            style="width:100%; max-width:720px; border-radius:12px; padding:12px; font-family:inherit; font-size:1rem;"></textarea>
+          <div
+            style="margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center;">
+            <button id="saveSorryBtn" class="pink-btn" type="button">Save to Server</button>
+            <button id="cancelSorryBtn" class="red-btn" type="button"
+              style="position:static; left:auto; top:auto;">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button class="pink-btn glow-circling" id="musicBtn">Play Romantic Song</button>
+        <button class="pink-btn glow-circling" id="hiddenBtn">Reveal Hidden Message</button>
+      </div>
+
+      <div class="hidden-box sweep-box" id="hiddenBox">
+        <p class="soft" id="hiddenMessageContent">
+          Hidden message: You are the sweetest person I have ever known.
+          Even when I make mistakes, my heart still chooses you every single time.
+          <br><br>
+          You're not just "someone"—you're my calm, my courage, and my forever.
+          <br><br>
+          <b>Sayari:</b><br>
+          <span id="sayariContent">"Tere bina lafz bhi khaamosh ho jaate hain…<br>
+            Main har ghalti ka ilaaj ban-na chahta hoon tere liye."</span>
+        </p>
+        <div id="hiddenMsgMeta" class="msg-indicator"></div>
+      </div>
+
+      <div class="music-status">Music will start after your first click or tap.</div>
+      <div class="audio-box">
+        <audio id="bgMusic" loop preload="none">
+          <source src="udaarian.mp3" type="audio/mpeg" />
+        </audio>
+      </div>
+    </div>
+
+    <!-- ==================== PROPOSAL SECTION ==================== -->
+    <div class="card circling-glow sweep section-target" id="proposalSection">
+      <h2><i>A Small Proposal</i></h2>
+      <div id="proposalMessageWrap">
+        <p id="proposalMessageText">
+          I do not want perfect words; I only want a real chance to love you better every day.
+          If your heart is willing, I want to stay by your side through every smile, every silence, and every dream.
+          I promise to protect your peace, respect your feelings, and cherish your presence.
+          <span class="accent">Your happiness will always matter to me.</span>
+        </p>
+        <div id="proposalMsgMeta" class="msg-indicator"></div>
+
+        <div id="proposalMessageControls"
+          style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+          <button id="claimProposalSenderBtn" class="pink-btn" type="button">I'm the sender</button>
+          <button id="editProposalBtn" class="green-btn" type="button" style="display:none;">Edit your message</button>
+          <button id="sendProposalBtn" class="green-btn" type="button" style="display:none;">Send this message</button>
+        </div>
+
+        <div style="margin-top:10px; text-align:center;">
+          <a id="createYourOwnProposalLink" href="?sender=1" style="color:#f8d1e2; text-decoration:underline;">Create
+            your own proposal site</a>
+        </div>
+
+        <div id="proposalMessageEditor" style="display:none; margin-top:12px; text-align:center;">
+          <textarea id="proposalMessageTextarea" rows="6"
+            style="width:100%; max-width:720px; border-radius:12px; padding:12px; font-family:inherit; font-size:1rem;"></textarea>
+          <div
+            style="margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center;">
+            <button id="saveProposalBtn" class="pink-btn" type="button">Save to Server</button>
+            <button id="cancelProposalBtn" class="red-btn" type="button"
+              style="position:static; left:auto; top:auto;">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="proposalSetup" class="proposal-setup">
+        <input id="senderName" type="text" placeholder="Your name">
+        <input id="senderEmail" type="email" placeholder="Your email for the result">
+        <input id="recipientName" type="text" placeholder="Their name">
+        <button class="pink-btn glow-circling" id="createProposalBtn" type="button">Create Unique Proposal Link</button>
+        <div class="proposal-status" id="proposalCreateStatus"></div>
+      </div>
+
+      <div class="buttons" style="position: relative;">
+        <button class="green-btn glow-circling" id="acceptBtn">Accept ❤</button>
+        <button class="red-btn glow-circling" id="rejectBtn">Reject 💔</button>
+      </div>
+
+      <div class="proposal-status" id="proposalResponseStatus"></div>
+
+      <div class="hidden-box sweep-box" id="acceptMsg">
+        <p class="soft">
+          Thank you for saying yes.
+          You just made my heart overflow with happiness.
+          From today, I want to be the reason behind your smile, your calm, and your beautiful little moments.
+        </p>
+      </div>
+
+      <div style="margin-top:16px; text-align:center;">
+        <a href="index.html?sender=1" style="color:#fff4a3; font-weight:700; text-decoration:none;">Create your own
+          proposal site</a>
+      </div>
+    </div>
+
+    <!-- ==================== GALLERY SECTION ==================== -->
+    <div class="card circling-glow sweep section-target" id="gallerySection">
+      <h2><i>Private Gallery</i></h2>
+      <p class="gallery-note">Open this gallery with a private passcode. Photos/videos/voice notes are stored on the
+        server
+        so the receiver can view them (kept for 30 days).</p>
+
+      <div class="gallery-shell">
+        <!-- Sender passcode setup -->
+        <div id="galleryPasscodeSection" class="gallery-passcode" style="display:none;">
+          <div class="gallery-passcode-row">
+            <input id="galleryPasscodeSetup" type="password" placeholder="Create a private gallery passcode">
+            <div class="gallery-passcode-actions">
+              <button id="setGalleryPasscodeBtn" class="pink-btn glow-circling" type="button">Set Passcode</button>
+            </div>
+          </div>
+          <div id="passcodeSetStatus" class="passcode-status"></div>
+        </div>
+
+        <!-- Receiver passcode entry -->
+        <div class="gallery-passcode">
+          <div class="gallery-passcode-row">
+            <input id="galleryPasscodeInput" type="password" placeholder="Enter the gallery passcode">
+            <div class="gallery-passcode-actions">
+              <button id="openGalleryBtn" class="green-btn glow-circling" type="button">Open Gallery</button>
+              <button id="closeGalleryBtn" class="green-btn glow-circling" type="button">Close Gallery</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="galleryStatus" class="gallery-note"></div>
+
+        <div id="galleryLockedContent" style="display:none;">
+          <div id="galleryUploadControls" class="gallery-upload">
+            <input id="galleryUpload" type="file" accept="image/*,video/*" multiple>
+            <textarea id="galleryMemoryTextarea" rows="3"
+              placeholder="Write a private memory or note for this photo or video"></textarea>
+            <button id="saveGalleryBtn" class="pink-btn glow-circling" type="button">Securely Save Memories</button>
+          </div>
+          <div id="galleryGrid" class="gallery-grid"></div>
+
+          <div class="voice-shell">
+            <div id="voiceUploadControls" class="voice-card">
+              <input id="voiceUpload" type="file" accept="audio/*" />
+              <textarea id="voiceNoteTextarea" rows="3" placeholder="Write a private voice note message"></textarea>
+              <button id="saveVoiceBtn" class="green-btn glow-circling" type="button">Send Voice Message</button>
+            </div>
+            <div id="voiceGrid" class="gallery-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== REFERRAL SECTION ==================== -->
+    <div class="card circling-glow sweep section-target" id="referralSection">
+      <h2><i>Referral</i></h2>
+      <p>Share this link with your loved one so they can open the proposal page and use the private gallery with the
+        same passcode.</p>
+      <div class="proposal-status" id="referralStatus"></div>
+      <div class="buttons" style="margin-top: 12px;">
+        <button class="pink-btn glow-circling" id="copyReferralBtn" type="button">Copy Your Proposal Link</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="galleryProtectionOverlay" class="gallery-protection-overlay" aria-live="polite">
+    Private gallery is hidden for privacy. Opening it again will restore the content.
+  </div>
+
+  <div id="heartFallLayer" aria-hidden="true"></div>
+
+  <div id="winLoveOverlay" style="display:none; position: fixed; inset: 0; z-index: 10000; pointer-events:none;">
+    <div id="winLoveMsg"
+      style="position:absolute; top:-100%; left:50%; transform:translateX(-50%); width:100%; text-align:center; font-weight:1000; font-size: clamp(44px, 8vw, 92px); line-height:1.05; color:#fff; text-shadow: 0 0 24px rgba(255,255,255,.35);">
+      I LOVE YOU
+    </div>
+  </div>
+
+  <div class="card circling-glow sweep" id="gameCard" style="margin-top: 16px;">
+    <h2>Love Brick Game</h2>
+    <div id="brickGameContainer"></div>
+    <div id="heartBelowGameWrap" style="display:none; margin-top:14px;">
+      <div
+        style="text-align:center; font-weight:900; color:#fffafc; text-shadow:0 0 10px rgba(0,0,0,.25); margin-bottom:10px;">
+        Glowing Heart</div>
+      <canvas id="heartBelowGameCanvas" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+  <script src="brick-game.js"></script>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxXVHaW5C5DWsOwlFq1s9EGVWRxYiKFjPcPcfJLKXr_5wb9dQ0MfeywbjO4NeyRa7D0rQ/exec";
+
+    const GALLERY_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+    const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
+
+    const MESSAGE_TYPES = {
+      DEEPEST_SORRY: "deepestSorry",
+      PROPOSAL_MESSAGE: "proposalMessage",
+      HIDDEN_MESSAGE: "hiddenMessage",
+      SAYARI: "sayari"
+    };
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    let proposalId = new URLSearchParams(window.location.search).get("proposal") || "";
+    const isSenderMode = new URLSearchParams(window.location.search).get("sender") === "1";
+    const PROPOSAL_HISTORY_KEY = "sorryWithLoveLastProposalId";
+    let latestProposalId = proposalId || localStorage.getItem(PROPOSAL_HISTORY_KEY) || "";
+    const isLowPowerView = window.matchMedia && (
+      window.matchMedia("(max-width: 700px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+
+    // ============================================================
+    // UTILITY FUNCTIONS
+    // ============================================================
+    function storageKey(key) { return latestProposalId ? `${key}_${latestProposalId}` : key; }
+    function senderStorageKey(id) { return "sorryWithLoveSender_" + id; }
+    function makeProposalId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 12); }
+    function proposalLinkFromId(id) {
+      if (!id) return window.location.href.split('?')[0];
+      const url = new URL(window.location.href.split('?')[0], window.location.origin);
+      url.searchParams.set("proposal", id);
+      return url.toString();
+    }
+    function isBackendReady() { return APPS_SCRIPT_URL && !APPS_SCRIPT_URL.includes("PASTE_YOUR"); }
+    function getTimestamp() { return new Date().toISOString(); }
+
+    function encodeBase64(value) {
+      const binary = typeof value === "string" ? new TextEncoder().encode(value) : value;
+      let str = "";
+      binary.forEach((byte) => { str += String.fromCharCode(byte); });
+      return btoa(str);
+    }
+    function decodeBase64(value) {
+      const binary = atob(value);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    }
+
+    async function hashPasscode(passcode) {
+      const clean = (passcode || "").trim();
+      if (!clean) return "";
+      if (!window.crypto || !crypto.subtle) return btoa(unescape(encodeURIComponent(clean)));
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(clean));
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    // ============================================================
+    // BACKEND API FUNCTIONS (React-like: each returns a value)
+    // ============================================================
+
+    /**
+     * Make a JSONP request to the backend
+     * @param {Object} params - query parameters
+     * @returns {Promise<Object|null>} response data
+     */
+    function jsonpRequest(params) {
+      return new Promise((resolve) => {
+        if (!isBackendReady()) { resolve(null); return; }
+        const callbackName = 'jsonp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        let script;
+        window[callbackName] = function (result) {
+          delete window[callbackName];
+          if (script && document.head.contains(script)) document.head.removeChild(script);
+          resolve(result || null);
+        };
+        script = document.createElement('script');
+        const url = new URL(APPS_SCRIPT_URL);
+        Object.entries(params).forEach(([k, v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, String(v)); });
+        url.searchParams.set("callback", callbackName);
+        script.src = url.toString();
+        script.onerror = () => {
+          delete window[callbackName];
+          if (script && document.head.contains(script)) document.head.removeChild(script);
+          resolve(null);
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    /**
+     * Make a POST request to the backend (no-cors)
+     * @param {Object} params - form data parameters
+     */
+    function postToBackend(params) {
+      if (!isBackendReady()) return;
+      try {
+        const form = new URLSearchParams();
+        Object.entries(params).forEach(([k, v]) => {
+          if (v !== undefined && v !== null) form.set(k, String(v));
+        });
+        fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          cache: "no-store",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: form.toString()
+        }).catch(() => { });
+      } catch (e) { /* silent */ }
+    }
+
+    /**
+     * Create a new proposal on the server
+     * @param {string} id - proposal ID
+     * @param {string} senderName
+     * @param {string} senderEmail
+     * @param {string} recipientName
+     * @returns {Promise<Object|null>} creation result
+     */
+    async function createProposal(id, senderName, senderEmail, recipientName) {
+      return jsonpRequest({
+        action: "create",
+        id: id,
+        senderName: senderName,
+        senderEmail: senderEmail,
+        recipientName: recipientName
+      });
+    }
+
+    /**
+     * Save a custom message to the server
+     * @param {string} id - proposal ID
+     * @param {string} messageType - deepestSorry|proposalMessage|hiddenMessage|sayari
+     * @param {string} messageText - the message content
+     * @returns {Promise<Object|null>} save result
+     */
+    async function saveMessage(id, messageType, messageText) {
+      return jsonpRequest({
+        action: "saveMessage",
+        id: id,
+        messageType: messageType,
+        messageText: messageText
+      });
+    }
+
+    /**
+     * Get all messages (custom + auto-romantic) for a proposal
+     * @param {string} id - proposal ID
+     * @returns {Promise<Object|null>} messages data
+     */
+    async function getMessages(id) {
+      return jsonpRequest({ action: "getMessages", id: id });
+    }
+
+    /**
+     * Get a single romantic auto-generated message
+     * @param {string} id - proposal ID
+     * @param {string} messageType
+     * @returns {Promise<Object|null>} romantic message
+     */
+    async function getRomanticMessage(id, messageType) {
+      return jsonpRequest({ action: "getRomanticMessage", id: id, messageType: messageType });
+    }
+
+    /**
+     * Set the gallery passcode hash on the server
+     * @param {string} id - proposal ID
+     * @param {string} passcodeHash - SHA-256 hash of passcode
+     * @returns {Promise<Object|null>} set result
+     */
+    async function setPasscode(id, passcodeHash) {
+      return jsonpRequest({ action: "setPasscode", id: id, passcodeHash: passcodeHash });
+    }
+
+    /**
+     * Verify a passcode hash against the stored one
+     * @param {string} id - proposal ID
+     * @param {string} passcodeHash - SHA-256 hash of entered passcode
+     * @returns {Promise<Object|null>} verification result
+     */
+    async function verifyPasscode(id, passcodeHash) {
+      return jsonpRequest({ action: "verifyPasscode", id: id, passcodeHash: passcodeHash });
+    }
+
+    /**
+     * Record a proposal response (accept/reject)
+     * @param {string} id - proposal ID
+     * @param {string} choice - "accepted" or "rejected"
+     * @returns {Promise<Object|null>} response result
+     */
+    async function respondToProposal(id, choice) {
+      return jsonpRequest({
+        action: "respond",
+        id: id,
+        choice: choice,
+        userAgent: navigator.userAgent
+      });
+    }
+
+    /**
+     * Check if a proposal has been responded to
+     * @param {string} id - proposal ID
+     * @returns {Promise<Object|null>} check result
+     */
+    async function checkResponse(id) {
+      return jsonpRequest({ action: "checkResponse", id: id, _: Date.now() });
+    }
+
+    /**
+     * Get proposal status
+     * @param {string} id - proposal ID
+     * @returns {Promise<Object|null>} status data
+     */
+    async function getStatus(id) {
+      return jsonpRequest({ action: "getStatus", id: id });
+    }
+
+    /**
+     * Get all data (messages + media) for a proposal
+     * @param {string} id - proposal ID
+     * @returns {Promise<Object|null>} all data
+     */
+    async function getAllData(id) {
+      return jsonpRequest({ action: "getAllData", id: id });
+    }
+
+    /**
+     * Save media (image/video/audio) to server
+     */
+    async function saveMedia(id, dataKey, dataValue, mediaType, memory) {
+      // Use POST for large payloads
+      postToBackend({
+        action: "saveMedia",
+        id: id,
+        dataKey: dataKey,
+        dataValue: dataValue,
+        mediaType: mediaType,
+        memory: memory || ""
+      });
+    }
+
+    /**
+     * Get all media for a proposal
+     * @param {string} id - proposal ID
+     * @returns {Promise<Object|null>} media data
+     */
+    async function getMedia(id) {
+      return jsonpRequest({ action: "getMedia", id: id });
+    }
+
+    // ============================================================
+    // DOM REFS
+    // ============================================================
+    const $ = (id) => document.getElementById(id);
+
+    // ============================================================
+    // MENU SCROLL
+    // ============================================================
+    document.querySelectorAll('[data-section]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const target = document.getElementById(button.getAttribute('data-section'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // ============================================================
+    // SENDER IDENTITY FUNCTIONS
+    // ============================================================
+
+    function isOwnProposalLink() {
+      return proposalId && localStorage.getItem(senderStorageKey(proposalId)) === "1";
+    }
+
+    function isGallerySender() {
+      if (proposalId) return localStorage.getItem(senderStorageKey(proposalId)) === "1";
+      return isSenderMode ||
+        localStorage.getItem('deepestSorry_sender') === "1" ||
+        localStorage.getItem('proposalMessage_sender') === "1";
+    }
+
+    function getGallerySecretKey() { return storageKey("privateGalleryPasscode"); }
+    function getGalleryPasscode() { return localStorage.getItem(getGallerySecretKey()) || ""; }
+    function setGalleryPasscode(passcode) { localStorage.setItem(getGallerySecretKey(), passcode); }
+
+    // ============================================================
+    // MESSAGE HANDLING FUNCTIONS (React-like pattern)
+    // ============================================================
+
+    /**
+     * Update a message display element with content and metadata
+     * @param {string} elementId - the id of the element to update
+     * @param {string} content - the message text (with newlines converted to <br>)
+     * @param {boolean} isCustom - whether this was sender-edited
+     * @param {string} metaElementId - the id of the metadata element
+     */
+    function updateMessageDisplay(elementId, content, isCustom, metaElementId) {
+      const el = $(elementId);
+      const meta = $(metaElementId);
+      if (el) {
+        const clean = (content || '').replace(/\n/g, '<br>');
+        el.innerHTML = clean;
+      }
+      if (meta) {
+        meta.innerHTML = isCustom
+          ? '<span class="sender-badge">💌 Sender\'s personal message</span>'
+          : '<span class="auto-msg-badge">💖 Lovingly crafted for you</span>';
+      }
+    }
+
+    /**
+     * Load messages from backend and update the UI
+     * @returns {Promise<Object|null>} messages data
+     */
+    async function loadMessagesFromBackend() {
+      if (!proposalId || !isBackendReady()) return null;
+      const result = await getMessages(proposalId);
+      if (!result || !result.success || !result.messages) return null;
+
+      const msgs = result.messages;
+
+      // Update "Deepest Sorry" message
+      if (msgs[MESSAGE_TYPES.DEEPEST_SORRY]) {
+        const d = msgs[MESSAGE_TYPES.DEEPEST_SORRY];
+        updateMessageDisplay('deepestSorryMsg', d.text, d.isCustom, 'deepestSorryMsgMeta');
+      }
+
+      // Update proposal message
+      if (msgs[MESSAGE_TYPES.PROPOSAL_MESSAGE]) {
+        const d = msgs[MESSAGE_TYPES.PROPOSAL_MESSAGE];
+        updateMessageDisplay('proposalMessageText', d.text, d.isCustom, 'proposalMsgMeta');
+      }
+
+      // Update hidden message content
+      if (msgs[MESSAGE_TYPES.HIDDEN_MESSAGE]) {
+        const d = msgs[MESSAGE_TYPES.HIDDEN_MESSAGE];
+        const hiddenEl = $('hiddenMessageContent');
+        if (hiddenEl) {
+          // Preserve the structure but update the main content
+          const sayariEl = $('sayariContent');
+          if (sayariEl && msgs[MESSAGE_TYPES.SAYARI]) {
+            sayariEl.innerHTML = msgs[MESSAGE_TYPES.SAYARI].text.replace(/\n/g, '<br>');
+          }
+          // Update the base text (first part before Sayari)
+          const parts = d.text.split(/\n\n<b>Sayari:/);
+          hiddenEl.innerHTML = parts[0].replace(/\n/g, '<br>') +
+            (msgs[MESSAGE_TYPES.SAYARI] ? '<br><br><b>Sayari:</b><br>' + msgs[MESSAGE_TYPES.SAYARI].text.replace(/\n/g, '<br>') : '');
+        }
+        updateMessageDisplay('hiddenMsgMeta', '', d.isCustom, 'hiddenMsgMeta');
+      }
+
+      return result;
+    }
+
+    /**
+     * Save a custom message to the server and update UI
+     * @param {string} messageType
+     * @param {string} messageText
+     * @param {string} displayElementId
+     * @param {string} metaElementId
+     * @returns {Promise<boolean>} success
+     */
+    async function saveCustomMessage(messageType, messageText, displayElementId, metaElementId) {
+      if (!proposalId) return false;
+      const result = await saveMessage(proposalId, messageType, messageText);
+      if (result && result.success) {
+        updateMessageDisplay(displayElementId, messageText, true, metaElementId);
+        // Also save to localStorage for offline fallback
+        localStorage.setItem(storageKey(messageType + '_message'), messageText);
+        return true;
+      }
+      // Fallback: save locally even if server fails
+      updateMessageDisplay(displayElementId, messageText, true, metaElementId);
+      localStorage.setItem(storageKey(messageType + '_message'), messageText);
+      // Try POST as backup
+      postToBackend({ action: "saveMessage", id: proposalId, messageType: messageType, messageText: messageText });
+      return true;
+    }
+
+    // ============================================================
+    // GALLERY FUNCTIONS
+    // ============================================================
+
+    function getGalleryItems() {
+      const raw = localStorage.getItem(storageKey("privateGalleryItems"));
+      if (!raw) return [];
+      try { return JSON.parse(raw); } catch (e) { return []; }
+    }
+    function saveGalleryItems(items) { localStorage.setItem(storageKey("privateGalleryItems"), JSON.stringify(items)); }
+    function getVoiceItems() {
+      const raw = localStorage.getItem(storageKey("privateVoiceItems"));
+      if (!raw) return [];
+      try { return JSON.parse(raw); } catch (e) { return []; }
+    }
+    function saveVoiceItems(items) { localStorage.setItem(storageKey("privateVoiceItems"), JSON.stringify(items)); }
+
+    function purgeExpiredGalleryItems() {
+      const now = Date.now();
+      const items = getGalleryItems().filter(i => (i.expiresAt || 0) > now);
+      saveGalleryItems(items);
+      return items;
+    }
+    function purgeExpiredVoiceItems() {
+      const now = Date.now();
+      const items = getVoiceItems().filter(i => (i.expiresAt || 0) > now);
+      saveVoiceItems(items);
+      return items;
+    }
+
+    async function deriveGalleryKey(passcode) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey("raw", encoder.encode(passcode), "PBKDF2", false, ["deriveKey"]);
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: encoder.encode("sorry-with-love-gallery-v1"), iterations: 250000, hash: "SHA-256" },
+        keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]
+      );
+    }
+
+    async function encryptString(value, passcode) {
+      if (!window.crypto || !crypto.subtle) return { plain: value };
+      const encoder = new TextEncoder();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveGalleryKey(passcode);
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(value));
+      return { iv: encodeBase64(iv), data: encodeBase64(new Uint8Array(encrypted)) };
+    }
+
+    async function decryptString(payload, passcode) {
+      if (!payload || !window.crypto || !crypto.subtle) return payload && payload.plain ? payload.plain : "";
+      if (payload.plain) return payload.plain;
+      const key = await deriveGalleryKey(passcode);
+      const iv = decodeBase64(payload.iv);
+      const data = decodeBase64(payload.data);
+      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+      return new TextDecoder().decode(decrypted);
+    }
+
+    /**
+     * Load gallery media from server (receiver view)
+     * Merges server media into local storage for display
+     */
+    async function loadMediaFromServer() {
+      if (!proposalId || !isBackendReady()) return;
+      const result = await getMedia(proposalId);
+      if (!result || !result.success || !result.media || !result.media.length) return;
+
+      const passcode = getGalleryPasscode();
+      if (!passcode) return;
+
+      const localGallery = getGalleryItems();
+      const localVoice = getVoiceItems();
+      let galleryChanged = false;
+      let voiceChanged = false;
+
+      for (const mediaItem of result.media) {
+        let parsedValue = mediaItem.dataValue;
+        try { parsedValue = JSON.parse(mediaItem.dataValue); } catch (e) { parsedValue = mediaItem.dataValue; }
+
+        if (mediaItem.mediaType === 'audio') {
+          const exists = localVoice.some(item => item.id === mediaItem.dataKey);
+          if (!exists && parsedValue) {
+            let notePayload = mediaItem.memory || null;
+            try { notePayload = JSON.parse(notePayload); } catch (e) { /* as is */ }
+            localVoice.push({
+              id: mediaItem.dataKey,
+              audioData: parsedValue,
+              note: notePayload,
+              createdAt: parseInt(mediaItem.createdAt) || Date.now(),
+              expiresAt: parseInt(mediaItem.expiresAt) || (Date.now() + GALLERY_TTL_MS)
+            });
+            voiceChanged = true;
+          }
+        } else if (mediaItem.mediaType === 'image' || mediaItem.mediaType === 'video') {
+          const exists = localGallery.some(item => item.id === mediaItem.dataKey);
+          if (!exists && parsedValue) {
+            let memoryPayload = mediaItem.memory || null;
+            try { memoryPayload = JSON.parse(memoryPayload); } catch (e) { /* as is */ }
+            localGallery.push({
+              id: mediaItem.dataKey,
+              mediaData: parsedValue,
+              memory: memoryPayload,
+              kind: mediaItem.mediaType === 'video' ? 'video' : 'image',
+              createdAt: parseInt(mediaItem.createdAt) || Date.now(),
+              expiresAt: parseInt(mediaItem.expiresAt) || (Date.now() + GALLERY_TTL_MS)
+            });
+            galleryChanged = true;
+          }
+        }
+      }
+
+      if (galleryChanged) { saveGalleryItems(localGallery); }
+      if (voiceChanged) { saveVoiceItems(localVoice); }
+    }
+
+    async function renderGalleryItems() {
+      const items = purgeExpiredGalleryItems();
+      const grid = $('galleryGrid');
+      if (!items.length) {
+        grid.innerHTML = '<div class="gallery-note">No private memories yet.</div>';
+        return;
+      }
+      const passcode = getGalleryPasscode();
+      if (!passcode) {
+        grid.innerHTML = '<div class="gallery-note">Unlock the gallery with a passcode to view private memories.</div>';
+        return;
+      }
+      const visibleItems = [];
+      for (let index = 0; index < items.length; index++) {
+        const item = items[index];
+        try {
+          const mediaData = await decryptString(item.mediaData, passcode);
+          const memory = item.memory ? await decryptString(item.memory, passcode) : "";
+          visibleItems.push({ id: item.id || `${item.createdAt}-${index}`, mediaData, memory, kind: item.kind || 'image' });
+        } catch (e) { /* skip */ }
+      }
+      if (!visibleItems.length) {
+        grid.innerHTML = '<div class="gallery-note">No memories can be shown right now.</div>';
+        return;
+      }
+      grid.innerHTML = visibleItems.map(item => `
+      <div class="gallery-item">
+        ${item.kind === 'video'
+          ? `<video controls preload="metadata" src="${item.mediaData}"></video>`
+          : `<img src="${item.mediaData}" alt="private memory">`}
+        <div class="caption">${(item.memory || '').replace(/</g, '<').replace(/>/g, '>')}</div>
+        <div class="gallery-item-actions">
+          <button type="button" data-delete-gallery-id="${item.id}">Delete</button>
+        </div>
+      </div>
+    `).join('');
+      grid.querySelectorAll('[data-delete-gallery-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const itemId = btn.getAttribute('data-delete-gallery-id');
+          const current = getGalleryItems();
+          saveGalleryItems(current.filter((item, idx) => {
+            const storedId = item.id || `${item.createdAt}-${idx}`;
+            return storedId !== itemId;
+          }));
+          renderGalleryItems();
+        });
+      });
+    }
+
+    async function renderVoiceItems() {
+      const items = purgeExpiredVoiceItems();
+      const grid = $('voiceGrid');
+      if (!items.length) {
+        grid.innerHTML = '<div class="gallery-note">No private voice messages yet.</div>';
+        return;
+      }
+      const passcode = getGalleryPasscode();
+      if (!passcode) {
+        grid.innerHTML = '<div class="gallery-note">Unlock the gallery to listen to voice messages.</div>';
+        return;
+      }
+      const visibleItems = [];
+      for (const item of items) {
+        try {
+          const note = item.note ? await decryptString(item.note, passcode) : "";
+          const audioData = await decryptString(item.audioData, passcode);
+          visibleItems.push({ note, audioData, id: item.id });
+        } catch (e) { /* skip */ }
+      }
+      if (!visibleItems.length) {
+        grid.innerHTML = '<div class="gallery-note">No voice messages can be shown right now.</div>';
+        return;
+      }
+      grid.innerHTML = visibleItems.map(item => `
+      <div class="gallery-item">
+        <div class="voice-player">
+          <audio controls preload="auto" playsinline data-voice-id="${item.id}" src="${item.audioData}"></audio>
+          <button type="button" class="voice-play-btn" data-play-voice="${item.id}">Play voice message</button>
+        </div>
+        <div class="caption">${(item.note || '').replace(/</g, '<').replace(/>/g, '>')}</div>
+        <div class="gallery-item-actions">
+          <button type="button" data-delete-voice="${item.id}">Delete</button>
+        </div>
+      </div>
+    `).join('');
+      grid.querySelectorAll('[data-play-voice]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const voiceId = btn.getAttribute('data-play-voice');
+          const audio = grid.querySelector(`audio[data-voice-id="${voiceId}"]`);
+          if (audio) audio.play().catch(() => { });
+        });
+      });
+      grid.querySelectorAll('[data-delete-voice]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-delete-voice');
+          saveVoiceItems(getVoiceItems().filter(item => item.id !== id));
+          renderVoiceItems();
+        });
+      });
+    }
+
+    function showGalleryMessage(message, isError = false) {
+      const status = $('galleryStatus');
+      status.textContent = message;
+      status.style.color = isError ? '#ffd6de' : '#fff4a3';
+    }
+
+    function updateGalleryAccess() {
+      const showSender = isGallerySender();
+      if ($('galleryPasscodeSection')) $('galleryPasscodeSection').style.display = showSender ? 'grid' : 'none';
+      if ($('closeGalleryBtn')) $('closeGalleryBtn').style.display = showSender ? 'inline-flex' : 'none';
+      if ($('galleryUploadControls')) $('galleryUploadControls').style.display = showSender ? 'block' : 'none';
+      if ($('voiceUploadControls')) $('voiceUploadControls').style.display = showSender ? 'block' : 'none';
+    }
+
+    function closeGalleryAfterUpload() {
+      if ($('galleryLockedContent')) $('galleryLockedContent').style.display = 'none';
+      if ($('galleryPasscodeInput')) $('galleryPasscodeInput').value = '';
+      showGalleryMessage('Gallery closed after upload. Open it again with the passcode when needed.');
+    }
+
+    function blankGalleryForPrivacy(reason = "privacy") {
+      const content = $('galleryLockedContent');
+      const overlay = $('galleryProtectionOverlay');
+      if (!content) return;
+      content.classList.add("gallery-blanked");
+      if (overlay) {
+        overlay.style.display = "flex";
+        overlay.textContent = reason === "capture"
+          ? "Private gallery hidden after a capture attempt."
+          : "Private gallery hidden for privacy.";
+      }
+    }
+    function restoreGalleryForPrivacy() {
+      const content = $('galleryLockedContent');
+      const overlay = $('galleryProtectionOverlay');
+      if (!content) return;
+      content.classList.remove("gallery-blanked");
+      if (overlay) overlay.style.display = "none";
+    }
+
+    // ============================================================
+    // PROPOSAL SETUP FUNCTION
+    // ============================================================
+
+    function setProposalMode() {
+      const setup = $('proposalSetup');
+      const acceptBtn = $('acceptBtn');
+      const rejectBtn = $('rejectBtn');
+      const status = $('proposalResponseStatus');
+
+      if (proposalId) {
+        setup.style.display = "none";
+        if (isOwnProposalLink()) {
+          acceptBtn.disabled = true;
+          rejectBtn.disabled = true;
+          status.textContent = "This is your own proposal link. Send it to them.";
+        } else {
+          acceptBtn.disabled = false;
+          rejectBtn.disabled = false;
+          status.textContent = "";
+        }
+      } else {
+        setup.style.display = "";
+        acceptBtn.disabled = true;
+        rejectBtn.disabled = true;
+        status.textContent = "Create a unique proposal link first, then send that link.";
+      }
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+
+    function init() {
+      setProposalMode();
+      updateGalleryAccess();
+
+      // If viewing a proposal, load messages and media from backend
+      if (proposalId && isBackendReady()) {
+        // Load messages (custom or auto-romantic)
+        loadMessagesFromBackend();
+
+        // If receiver, load media from server after a short delay
+        if (!isOwnProposalLink()) {
+          setTimeout(() => {
+            loadMediaFromServer().then(() => {
+              if ($('galleryLockedContent') && $('galleryLockedContent').style.display === 'block') {
+                renderGalleryItems();
+                renderVoiceItems();
+              }
+            });
+          }, 1000);
+        }
+
+        // Poll for response if sender
+        if (isOwnProposalLink()) {
+          setInterval(() => {
+            if (!isOwnProposalLink() || !isBackendReady()) return;
+            pollForResponse();
+          }, 15000);
+        }
+      }
+
+      // Brick game init
+      function initBrickOnReady() {
+        if (!window.initBrickLoveGame) return;
+        window.initBrickLoveGame({ containerId: 'brickGameContainer', onWin: () => { }, onLose: () => { } });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          requestAnimationFrame(() => requestAnimationFrame(initBrickOnReady));
+        });
+      } else {
+        requestAnimationFrame(() => requestAnimationFrame(initBrickOnReady));
+      }
+    }
+
+    // ============================================================
+    // EVENT HANDLERS
+    // ============================================================
+
+    // --- Sender Claim Buttons ---
+    $('claimSenderBtn').addEventListener('click', () => {
+      localStorage.setItem('deepestSorry_sender', "1");
+      if (proposalId) localStorage.setItem(senderStorageKey(proposalId), "1");
+      $('editSorryBtn').style.display = 'inline-flex';
+      $('sendSorryBtn').style.display = 'inline-flex';
+      $('claimSenderBtn').style.display = 'none';
+      updateGalleryAccess();
+      // Load current message into editor if exists
+      const savedMsg = localStorage.getItem(storageKey('deepestSorry_message'));
+      if (savedMsg) $('deepestSorryTextarea').value = savedMsg;
+    });
+
+    $('claimProposalSenderBtn').addEventListener('click', () => {
+      localStorage.setItem('proposalMessage_sender', "1");
+      if (proposalId) localStorage.setItem(senderStorageKey(proposalId), "1");
+      $('editProposalBtn').style.display = 'inline-flex';
+      $('sendProposalBtn').style.display = 'inline-flex';
+      $('claimProposalSenderBtn').style.display = 'none';
+      updateGalleryAccess();
+      const savedMsg = localStorage.getItem(storageKey('proposalMessage_message'));
+      if (savedMsg) $('proposalMessageTextarea').value = savedMsg;
+    });
+
+    // --- Edit Deepest Sorry ---
+    $('editSorryBtn').addEventListener('click', () => {
+      $('deepestSorryEditor').style.display = 'block';
+      const current = $('deepestSorryMsg').innerText.replace('❤', '').trim();
+      $('deepestSorryTextarea').value = current;
+    });
+
+    $('cancelSorryBtn').addEventListener('click', () => {
+      $('deepestSorryEditor').style.display = 'none';
+    });
+
+    $('saveSorryBtn').addEventListener('click', async () => {
+      const text = $('deepestSorryTextarea').value.trim();
+      if (!text) return;
+      $('deepestSorryEditor').style.display = 'none';
+      await saveCustomMessage(MESSAGE_TYPES.DEEPEST_SORRY, text, 'deepestSorryMsg', 'deepestSorryMsgMeta');
+      localStorage.setItem(storageKey('deepestSorry_message'), text);
+    });
+
+    $('sendSorryBtn').addEventListener('click', async () => {
+      const text = $('deepestSorryMsg').innerText.replace('❤', '').trim();
+      if (!text || !proposalId) return;
+      await saveCustomMessage(MESSAGE_TYPES.DEEPEST_SORRY, text, 'deepestSorryMsg', 'deepestSorryMsgMeta');
+      localStorage.setItem(storageKey('deepestSorry_message'), text);
+      $('sendSorryBtn').textContent = '✅ Sent!';
+      setTimeout(() => { $('sendSorryBtn').textContent = 'Send this message'; }, 2000);
+    });
+
+    // --- Edit Proposal Message ---
+    $('editProposalBtn').addEventListener('click', () => {
+      $('proposalMessageEditor').style.display = 'block';
+      const current = $('proposalMessageText').innerText.trim();
+      $('proposalMessageTextarea').value = current;
+    });
+
+    $('cancelProposalBtn').addEventListener('click', () => {
+      $('proposalMessageEditor').style.display = 'none';
+    });
+
+    $('saveProposalBtn').addEventListener('click', async () => {
+      const text = $('proposalMessageTextarea').value.trim();
+      if (!text) return;
+      $('proposalMessageEditor').style.display = 'none';
+      await saveCustomMessage(MESSAGE_TYPES.PROPOSAL_MESSAGE, text, 'proposalMessageText', 'proposalMsgMeta');
+      localStorage.setItem(storageKey('proposalMessage_message'), text);
+    });
+
+    $('sendProposalBtn').addEventListener('click', async () => {
+      const text = $('proposalMessageText').innerText.trim();
+      if (!text || !proposalId) return;
+      await saveCustomMessage(MESSAGE_TYPES.PROPOSAL_MESSAGE, text, 'proposalMessageText', 'proposalMsgMeta');
+      localStorage.setItem(storageKey('proposalMessage_message'), text);
+      $('sendProposalBtn').textContent = '✅ Sent!';
+      setTimeout(() => { $('sendProposalBtn').textContent = 'Send this message'; }, 2000);
+    });
+
+    // --- Hidden Message Button ---
+    $('hiddenBtn').addEventListener('click', () => {
+      const box = $('hiddenBox');
+      box.classList.toggle("show");
+      if (box.classList.contains("show")) {
+        box.classList.remove("progress-anim");
+        void box.offsetWidth;
+        box.classList.add("progress-anim");
+      }
+    });
+
+    // --- Music ---
+    const bgMusic = $('bgMusic');
+    function startMusic(showLyrics = true) {
+      bgMusic.volume = 0.7;
+      bgMusic.play().catch(() => { });
+      if (showLyrics) showLyricsSweep();
+    }
+
+    $('musicBtn').addEventListener('click', () => startMusic(true));
+    document.addEventListener("click", () => { if (bgMusic.paused) startMusic(false); }, { once: true });
+
+    // --- Accept/Reject ---
+    $('acceptBtn').addEventListener('click', async () => {
+      if (!proposalId) return;
+      const result = await respondToProposal(proposalId, "accepted");
+      if (result && result.success) {
+        $('proposalResponseStatus').textContent = "💖 Your yes has been sent! The sender will be notified via email.";
+        $('acceptMsg').classList.add("show");
+        launchAcceptanceCelebration();
+      } else {
+        // Fallback: try POST
+        postToBackend({ action: "respond", id: proposalId, choice: "accepted", userAgent: navigator.userAgent });
+        $('proposalResponseStatus').textContent = "💖 Your yes has been sent!";
+        $('acceptMsg').classList.add("show");
+        launchAcceptanceCelebration();
+      }
+    });
+
+    $('rejectBtn').addEventListener('click', async () => {
+      if (!proposalId) return;
+      const result = await respondToProposal(proposalId, "rejected");
+      if (result && result.success) {
+        $('proposalResponseStatus').textContent = "💔 Your answer has been sent.";
+      } else {
+        postToBackend({ action: "respond", id: proposalId, choice: "rejected", userAgent: navigator.userAgent });
+        $('proposalResponseStatus').textContent = "💔 Your answer has been sent.";
+      }
+    });
+
+    // --- Create Proposal ---
+    $('createProposalBtn').addEventListener('click', async () => {
+      const senderName = $('senderName').value;
+      const senderEmail = $('senderEmail').value;
+      const recipientName = $('recipientName').value;
+
+      $('createProposalBtn').disabled = true;
+      $('proposalCreateStatus').textContent = "Creating your private link...";
+
+      try {
+        const id = makeProposalId();
+        const link = proposalLinkFromId(id);
+        localStorage.setItem(senderStorageKey(id), "1");
+        localStorage.setItem(PROPOSAL_HISTORY_KEY, id);
+        latestProposalId = id;
+        proposalId = id;
+        const newUrl = new URL(window.location.href.split('?')[0], window.location.origin);
+        newUrl.searchParams.set("proposal", id);
+        window.history.replaceState({}, "", newUrl.toString());
+        updateGalleryAccess();
+        setProposalMode();
+
+        // Create on backend
+        const result = await createProposal(id, senderName, senderEmail, recipientName);
+        if (!result || !result.success) {
+          // Fallback: try GET
+          const url = new URL(APPS_SCRIPT_URL);
+          url.searchParams.set("action", "create");
+          url.searchParams.set("id", id);
+          url.searchParams.set("senderName", senderName);
+          url.searchParams.set("senderEmail", senderEmail);
+          url.searchParams.set("recipientName", recipientName);
+          fetch(url.toString(), { method: "GET", mode: "no-cors", cache: "no-store" }).catch(() => { });
+        }
+
+        // Mark sender for editing
+        $('editSorryBtn').style.display = 'inline-flex';
+        $('sendSorryBtn').style.display = 'inline-flex';
+        $('editProposalBtn').style.display = 'inline-flex';
+        $('sendProposalBtn').style.display = 'inline-flex';
+        $('claimSenderBtn').style.display = 'none';
+        $('claimProposalSenderBtn').style.display = 'none';
+
+        $('proposalCreateStatus').innerHTML = `Your unique link is ready:<br><a href="${link}" target="_blank">${link}</a>`;
+      } catch (error) {
+        $('proposalCreateStatus').textContent = error.message || "Could not create proposal link.";
+      } finally {
+        $('createProposalBtn').disabled = false;
+      }
+    });
+
+    // --- Gallery Passcode ---
+    $('setGalleryPasscodeBtn').addEventListener('click', async () => {
+      const passcode = ($('galleryPasscodeSetup').value || "").trim();
+      if (!passcode) {
+        showGalleryMessage("Please choose a private passcode first.", true);
+        return;
+      }
+      setGalleryPasscode(passcode);
+      $('galleryPasscodeSetup').value = "";
+
+      // Save hash to server
+      if (proposalId && isBackendReady()) {
+        const passcodeHash = await hashPasscode(passcode);
+        const result = await setPasscode(proposalId, passcodeHash);
+        if (!result || !result.success) {
+          // Fallback via POST
+          postToBackend({ action: "setPasscode", id: proposalId, passcodeHash: passcodeHash });
+        }
+        $('passcodeSetStatus').textContent = '🔒 Passcode saved to server.';
+      } else {
+        $('passcodeSetStatus').textContent = '🔒 Passcode saved locally.';
+      }
+      showGalleryMessage("Passcode saved. Use it to unlock the private gallery.");
+    });
+
+    // --- Open Gallery ---
+    $('openGalleryBtn').addEventListener('click', async () => {
+      const entered = ($('galleryPasscodeInput').value || "").trim();
+
+      if (!entered) {
+        showGalleryMessage("Enter the private gallery passcode first.", true);
+        return;
+      }
+
+      if (proposalId && isBackendReady()) {
+        showGalleryMessage("Verifying passcode...");
+        const passcodeHash = await hashPasscode(entered);
+        const result = await verifyPasscode(proposalId, passcodeHash);
+        if (!result || !result.success) {
+          showGalleryMessage("Could not verify the passcode right now.", true);
+          return;
+        }
+        if (result.passcodeRequired === false) {
+          showGalleryMessage("The sender has not set a gallery passcode yet.", true);
+          return;
+        }
+        if (result.passcodeValid !== true) {
+          showGalleryMessage("Incorrect passcode. Only the sender and receiver with the same code can open this gallery.", true);
+          if ($('galleryLockedContent')) $('galleryLockedContent').style.display = "none";
+          return;
+        }
+      } else {
+        // Local verification
+        const stored = getGalleryPasscode();
+        if (!stored) {
+          showGalleryMessage("Set a passcode first before opening the gallery.", true);
+          return;
+        }
+        if (entered !== stored) {
+          showGalleryMessage("Incorrect passcode.", true);
+          if ($('galleryLockedContent')) $('galleryLockedContent').style.display = "none";
+          return;
+        }
+      }
+
+      setGalleryPasscode(entered);
+      if ($('galleryLockedContent')) $('galleryLockedContent').style.display = "block";
+      showGalleryMessage("✅ Gallery unlocked! Your memories are visible here.");
+
+      // Load media from server if receiver
+      if (proposalId && !isOwnProposalLink() && isBackendReady()) {
+        await loadMediaFromServer();
+      }
+      await renderGalleryItems();
+      await renderVoiceItems();
+    });
+
+    // --- Close Gallery ---
+    $('closeGalleryBtn').addEventListener('click', closeGalleryAfterUpload);
+
+    // --- Save Gallery ---
+    $('saveGalleryBtn').addEventListener('click', async () => {
+      const files = Array.from(($('galleryUpload').files || []));
+      const memory = ($('galleryMemoryTextarea').value || "").trim();
+      if (!files.length) { showGalleryMessage("Please choose at least one image/video.", true); return; }
+      const allowed = files.filter(f => f && (f.type.startsWith("image/") || f.type.startsWith("video/")));
+      if (!allowed.length) { showGalleryMessage("Only image or video files allowed.", true); return; }
+      if (allowed.find(f => f.size > MAX_MEDIA_BYTES)) { showGalleryMessage("Each file must be 5 MB or smaller.", true); return; }
+
+      const passcode = getGalleryPasscode();
+      if (!passcode) { showGalleryMessage("Set and unlock the gallery with a passcode first.", true); return; }
+
+      const items = getGalleryItems();
+      const promises = allowed.map(file => new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const encryptedMedia = await encryptString(reader.result, passcode);
+          const encryptedMemory = memory ? await encryptString(memory, passcode) : null;
+          resolve({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            mediaData: encryptedMedia,
+            memory: encryptedMemory,
+            kind: file.type.startsWith("video/") ? "video" : "image",
+            createdAt: Date.now(),
+            expiresAt: Date.now() + GALLERY_TTL_MS,
+          });
+        };
+        reader.readAsDataURL(file);
+      }));
+      const newItems = await Promise.all(promises);
+      saveGalleryItems([...newItems, ...items].slice(0, 12));
+      $('galleryUpload').value = "";
+      $('galleryMemoryTextarea').value = "";
+      await renderGalleryItems();
+      closeGalleryAfterUpload();
+      showGalleryMessage("Private memories saved securely and uploaded to the server (kept for 30 days).");
+
+      // Upload to server
+      if (proposalId && isBackendReady()) {
+        for (const item of newItems) {
+          saveMedia(proposalId, item.id, JSON.stringify(item.mediaData), item.kind === 'video' ? 'video' : 'image', item.memory ? JSON.stringify(item.memory) : "");
+        }
+      }
+    });
+
+    // --- Save Voice ---
+    $('saveVoiceBtn').addEventListener('click', async () => {
+      const file = $('voiceUpload').files && $('voiceUpload').files[0];
+      const note = ($('voiceNoteTextarea').value || "").trim();
+      const passcode = getGalleryPasscode();
+      if (!file) { showGalleryMessage("Please choose a voice message first.", true); return; }
+      if (!passcode) { showGalleryMessage("Set and unlock the gallery first.", true); return; }
+      if (file.size > MAX_MEDIA_BYTES) { showGalleryMessage("Voice messages must be 5 MB or smaller.", true); return; }
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const encryptedAudio = await encryptString(reader.result, passcode);
+        const encryptedNote = note ? await encryptString(note, passcode) : null;
+        const items = getVoiceItems();
+        const newItem = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          audioData: encryptedAudio,
+          note: encryptedNote,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + GALLERY_TTL_MS,
+        };
+        items.push(newItem);
+        saveVoiceItems(items);
+        $('voiceUpload').value = "";
+        $('voiceNoteTextarea').value = "";
+        await renderVoiceItems();
+        closeGalleryAfterUpload();
+        showGalleryMessage("Voice message saved securely (kept for 30 days).");
+
+        // Upload to server
+        if (proposalId && isBackendReady()) {
+          saveMedia(proposalId, newItem.id, JSON.stringify(encryptedAudio), "audio", encryptedNote ? JSON.stringify(encryptedNote) : "");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // --- Copy Referral ---
+    $('copyReferralBtn').addEventListener('click', async () => {
+      const linkId = proposalId || latestProposalId;
+      if (!linkId) {
+        $('referralStatus').textContent = "Create a proposal first.";
+        return;
+      }
+      const link = proposalLinkFromId(linkId);
+      try {
+        await navigator.clipboard.writeText(link);
+        $('referralStatus').textContent = "✅ Proposal link copied! Share it with your loved one.";
+      } catch (e) {
+        $('referralStatus').textContent = "Copy failed. Use the address bar to share.";
+      }
+    });
+
+    // --- Poll for Response ---
+    async function pollForResponse() {
+      if (!proposalId || !isBackendReady()) return;
+      const result = await checkResponse(proposalId);
+      if (result && result.success && result.hasResponse && result.choice) {
+        const existing = document.getElementById("senderResponseNotice");
+        if (existing) existing.remove();
+
+        const notice = document.createElement("div");
+        notice.id = "senderResponseNotice";
+        notice.style.cssText = "position:fixed;bottom:20px;right:20px;z-index:9999;padding:16px 20px;background:rgba(255,77,141,0.95);color:#fff;border-radius:12px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,0.2);animation:fadeIn 0.5s ease;max-width:300px;text-align:center;";
+        notice.innerHTML = "💌 " + (result.choice === "accepted"
+          ? "They said YES! Congratulations! 🎉"
+          : "They have responded.") +
+          "<br><a href='?proposal=" + proposalId + "' style='color:#fff4a3;text-decoration:underline;margin-top:8px;display:inline-block;'>View response</a>";
+        document.body.appendChild(notice);
+      }
+    }
+
+    // --- Privacy Protection ---
+    window.addEventListener("blur", () => blankGalleryForPrivacy("privacy"));
+    window.addEventListener("focus", restoreGalleryForPrivacy);
+    document.addEventListener("visibilitychange", () => {
+      document.hidden ? blankGalleryForPrivacy("privacy") : restoreGalleryForPrivacy();
+    });
+    document.addEventListener("keydown", (event) => {
+      const key = event.key ? event.key.toLowerCase() : "";
+      const isCapture = event.key === "PrintScreen" ||
+        (event.ctrlKey && key === "s") ||
+        ((event.ctrlKey || event.metaKey) && (key === "shift" || key === "3" || key === "4"));
+      if (isCapture) { event.preventDefault(); blankGalleryForPrivacy("capture"); }
+    });
+
+    // --- Periodic cleanup ---
+    setInterval(() => {
+      purgeExpiredGalleryItems();
+      purgeExpiredVoiceItems();
+      if ($('galleryLockedContent') && $('galleryLockedContent').style.display === "block") {
+        renderGalleryItems();
+        renderVoiceItems();
+      }
+    }, 30000);
+
+    // ============================================================
+    // ANIMATION FUNCTIONS (preserved from original)
+    // ============================================================
+
+    function spawnFallingHearts() {
+      const layer = $('heartFallLayer');
+      const count = isLowPowerView ? 14 : 45;
+      const palette = ["#ff4d8d", "#ff86b3", "#fff0f5", "#ffd1dc", "#ff5e62"];
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement("div");
+        h.className = "heart-fall";
+        h.textContent = "❤";
+        h.style.fontSize = (14 + Math.random() * 18) + "px";
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.color = palette[Math.floor(Math.random() * palette.length)];
+        h.style.setProperty("--dur", (isLowPowerView ? 1.6 + Math.random() * 1.2 : 1.2 + Math.random() * 1.4).toFixed(2) + "s");
+        layer.appendChild(h);
+        h.addEventListener("animationend", () => h.remove());
+      }
+    }
+
+    function launchAcceptanceCelebration() {
+      const layer = document.createElement("div");
+      layer.className = "celebration-layer";
+      document.body.appendChild(layer);
+
+      for (let i = 0; i < 24; i++) {
+        const heart = document.createElement("div");
+        heart.className = "heart-rain";
+        heart.textContent = "❤";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = 16 + Math.random() * 18 + "px";
+        heart.style.color = ["#ff4d8d", "#ffd1dc", "#fff0f5", "#ff86b3"][Math.floor(Math.random() * 4)];
+        heart.style.setProperty("--drift", (Math.random() * 80 - 40) + "px");
+        heart.style.animationDelay = Math.random() * 0.2 + "s";
+        layer.appendChild(heart);
+        setTimeout(() => heart.remove(), 2600);
+      }
+
+      const burstColors = ["#ff4d8d", "#ffd166", "#1dd1a1", "#48dbfb", "#ff9ff3"];
+      [120, 450, 800, 1150].forEach((delay, idx) => {
+        setTimeout(() => {
+          for (let i = 0; i < 10; i++) {
+            const spark = document.createElement("div");
+            spark.className = "firework";
+            spark.style.left = 50 + Math.random() * 20 - 10 + "%";
+            spark.style.top = 28 + Math.random() * 20 + "%";
+            spark.style.setProperty("--fire-color", burstColors[(idx + i) % burstColors.length]);
+            spark.style.setProperty("--burst-x", (Math.random() * 180 - 90) + "px");
+            spark.style.setProperty("--burst-y", (Math.random() * 180 - 90) + "px");
+            layer.appendChild(spark);
+            setTimeout(() => spark.remove(), 1200);
+          }
+        }, delay);
+      });
+
+      setTimeout(() => showProposalScene(), 1500);
+    }
+
+    function showProposalScene() {
+      const layer = document.createElement("div");
+      layer.className = "proposal-layer";
+      layer.innerHTML = `
+      <div class="proposal-scene">
+        <div class="proposal-card">
+          <div class="proposal-rainbow"></div>
+          <div class="proposal-text">Will you marry me?</div>
+          <div class="proposal-character proposal-boy">
+            <div class="proposal-person"><div class="detail"></div></div>
+            <div class="proposal-arm left"></div>
+            <div class="proposal-arm right"></div>
+            <div class="proposal-leg left"></div>
+            <div class="proposal-leg right"></div>
+          </div>
+          <div class="proposal-character proposal-girl">
+            <div class="proposal-person"><div class="detail"></div></div>
+            <div class="proposal-arm left"></div>
+            <div class="proposal-arm right"></div>
+            <div class="proposal-leg left"></div>
+            <div class="proposal-leg right"></div>
+          </div>
+        </div>
+      </div>`;
+      document.body.appendChild(layer);
+
+      const boy = layer.querySelector(".proposal-boy");
+      const girl = layer.querySelector(".proposal-girl");
+
+      for (let i = 0; i < 18; i++) {
+        const sparkle = document.createElement("div");
+        sparkle.className = "proposal-sparkle";
+        sparkle.style.left = 50 + Math.random() * 20 - 10 + "%";
+        sparkle.style.top = 30 + Math.random() * 30 + "%";
+        sparkle.style.setProperty("--sx", (Math.random() * 120 - 60) + "px");
+        sparkle.style.setProperty("--sy", (Math.random() * 120 - 60) + "px");
+        layer.querySelector(".proposal-card").appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 1400);
+      }
+
+      setTimeout(() => { boy.classList.add("kneel"); girl.classList.add("kneel"); }, 1200);
+
+      setTimeout(() => {
+        const card = layer.querySelector(".proposal-card");
+        const ring = document.createElement("div");
+        ring.className = "proposal-ring";
+        card.appendChild(ring);
+        setTimeout(() => {
+          ring.classList.add("landed");
+          const sparkColors = ["#fff8c9", "#ffffff", "#ffd166", "#b9f6ff"];
+          for (let i = 0; i < 16; i++) {
+            const spark = document.createElement("div");
+            spark.className = "proposal-ring-spark";
+            spark.style.setProperty("--ring-spark-color", sparkColors[i % sparkColors.length]);
+            spark.style.setProperty("--rsx", (Math.random() * 90 - 45) + "px");
+            spark.style.setProperty("--rsy", (-20 - Math.random() * 70) + "px");
+            card.appendChild(spark);
+            setTimeout(() => spark.remove(), 850);
+          }
+        }, 500);
+      }, 1800);
+
+      setTimeout(() => { layer.remove(); spawnFallingHearts(); }, 6000);
+    }
+
+    // ============================================================
+    // LYRICS SWEEP CARDS (preserved from original)
+    // ============================================================
+    function showLyricsSweep() {
+      const existing = document.getElementById("lyricsSweepLayer");
+      if (existing) return;
+      if (showLyricsSweep._opening) return;
+      showLyricsSweep._opening = true;
+      setTimeout(() => (showLyricsSweep._opening = false), 700);
+
+      const layer = document.createElement("div");
+      layer.id = "lyricsSweepLayer";
+      layer.style.cssText = "position:fixed;inset:0;z-index:10002;pointer-events:auto;background:rgba(0,0,0,.35);";
+      document.body.style.overflow = "hidden";
+      layer.style.display = "flex";
+      layer.style.alignItems = "flex-start";
+      layer.style.justifyContent = "center";
+      layer.style.paddingTop = "90px";
+
+      const sweepWrap = document.createElement("div");
+      sweepWrap.style.cssText = "width:min(860px,94vw);display:grid;grid-template-columns:1fr;gap:14px;z-index:10003;";
+
+      const lyricsCards = [
+        "Ho laawaan ishqe de ambari udaariyan\nSaanu pyar diyan chadhiyan khumariyan",
+        "Ho laawan ishqe de ambari udaariyan\nMainu pyar diyan chadhiyan khumariyan",
+        "Aa mere pair na zameen utte laggde\nPair na zameen utte laggde",
+        "Lakhaan chashme mohabbtan de waggde\nOh raati mithe mithe supne vi thugde",
+        "Na gall mere vas di rahi\nNa gall mere vas di rahi",
+        "O kisse aisiyan nigahan mainu takkeya\nChaunde hoye vi na dil ruk sakeya",
+        "Ho laawan baahan ch samet kayenaat main\nDassan kainu kainu ishqe di baat main",
+        "Aa rang phulla da vi hor goohda ho gaya\nPaani pyar wala pattiyan nu dho gaya",
+        "Nigah jis te sawalli hove rabb di\nSache ishqe di laag ohnu lagdi",
+        "Aa rom rom ch Satinder hai vaseya\nMeri apni parandi mainu daseya",
+        "Ho kisse aisiyan nigahan mainu takkeya\nGiya pair ishqe de vich rakheya",
+        "Badi lambi ae kahani mere pyar di",
+        "Sing this song,",
+      ];
+
+      sweepWrap.innerHTML = "";
+      const deck = document.createElement("div");
+      deck.style.cssText = "position:relative;z-index:3;width:100%;min-height:240px;display:flex;align-items:flex-start;justify-content:center;";
+      sweepWrap.appendChild(deck);
+
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "Next";
+      nextBtn.style.cssText = "margin:14px auto 0;display:block;border:none;cursor:pointer;padding:12px 22px;border-radius:999px;font-weight:900;color:#fff;background:linear-gradient(135deg,#8b5a2b,#c8894c);box-shadow:0 0 22px rgba(200,137,76,.35);pointer-events:auto;";
+
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "Close";
+      closeBtn.style.cssText = "margin:0;display:inline-block;pointer-events:auto;border:none;cursor:pointer;padding:12px 22px;border-radius:999px;font-weight:900;color:#fff;background:rgba(255,255,255,0.2);box-shadow:0 0 22px rgba(255,255,255,.15);";
+
+      const controls = document.createElement("div");
+      controls.style.cssText = "position:absolute;left:0;right:0;bottom:36px;width:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:20px;z-index:5;pointer-events:auto;";
+      controls.appendChild(closeBtn);
+      controls.appendChild(nextBtn);
+      sweepWrap.appendChild(controls);
+
+      const visibleCount = Math.min(4, lyricsCards.length);
+      const cardEls = [];
+
+      function mkCard(text) {
+        const card = document.createElement("div");
+        card.style.cssText = "position:absolute;left:50%;top:0;transform:translateX(-50%);width:100%;max-width:520px;min-height:420px;background:linear-gradient(180deg,rgba(90,52,20,.88),rgba(180,120,60,.22));border:1px solid rgba(255,210,160,.35);backdrop-filter:blur(10px);border-radius:22px;padding:18px;box-shadow:0 0 36px rgba(200,137,76,.18);padding-bottom:320px;color:#fff;text-align:center;text-shadow:0 0 18px rgba(0,0,0,.35);";
+        const content = document.createElement("div");
+        content.style.cssText = "white-space:pre-line;font-weight:900;font-size:clamp(16px,2.5vw,26px);line-height:1.25;margin-bottom:52px;";
+        content.textContent = text;
+        card.appendChild(content);
+
+        const bottomDecor = document.createElement("div");
+        bottomDecor.style.cssText = "position:absolute;left:50%;bottom:14px;z-index:3;mix-blend-mode:normal;transform:translateX(-50%);width:100%;text-align:center;pointer-events:none;";
+        bottomDecor.innerHTML = `
+        <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <div style="width:100%;display:flex;justify-content:center;">
+            <canvas class="deck-graph" width="280" height="140" style="max-width:100%;border-radius:14px;background:rgba(255,255,255,.08);box-shadow:0 0 26px rgba(255,77,141,.12);"></canvas>
+          </div>
+          <div style="font-weight:1000;font-size:16px;opacity:.95;text-shadow:0 0 18px rgba(255,77,141,.25);margin-top:10px;">(x^2+y^2-1)^3 - X^2Y^3 = 0</div>
+          <div class="deck-heart-fall" style="width:100%;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;margin-top:6px;min-height:44px;flex-wrap:nowrap;padding-top:30px;transform:translateX(0px);">
+            <div class="standing-heart" style="font-size:34px;line-height:1;filter:drop-shadow(0 0 18px rgba(255,77,141,.35));">❤</div>
+            <div style="height:2px;width:72%;background:linear-gradient(90deg,rgba(255,77,141,.0),rgba(255,77,141,.9),rgba(255,77,141,.0));opacity:.85;border-radius:999px;overflow:hidden;">
+              <div class="beat-line" style="width:40%;height:100%;background:rgba(255,77,141,.95);transform:translateX(-120%);border-radius:999px;animation:beatSweep 1.05s ease-in-out infinite;"></div>
+            </div>
+          </div>
+        </div>`;
+        card.appendChild(bottomDecor);
+
+        const fallHost = bottomDecor.querySelector(".deck-heart-fall");
+        for (let i = 0; i < 6; i++) {
+          const hf = document.createElement("span");
+          hf.textContent = Math.random() > 0.5 ? "❤" : "💗";
+          hf.style.cssText = `display:inline-block;position:relative;margin:0 6px;animation:deckCardHeartFloat ${1.4 + Math.random() * 1.2}s ease-in-out ${Math.random() * 0.6}s infinite;filter:drop-shadow(0 0 12px rgba(255,77,141,.35));opacity:0.95;transform:translateY(${Math.random() * 10}px);`;
+          fallHost.appendChild(hf);
+        }
+        return card;
+      }
+
+      for (let i = 0; i < visibleCount; i++) {
+        const card = mkCard(lyricsCards[i]);
+        card.style.opacity = i === 0 ? "1" : String(0.85 - i * 0.12);
+        card.style.zIndex = String(100 - i);
+        card.style.transform = `translateX(-50%) translateY(${i * 18}px) rotate(${i * 1.4 - 2}deg)`;
+        deck.appendChild(card);
+        cardEls.push(card);
+      }
+
+      let headIndex = 0;
+      function renderStack() {
+        for (let i = 0; i < cardEls.length; i++) {
+          const dataIdx = headIndex + i;
+          const text = lyricsCards[dataIdx] ?? "";
+          const content = cardEls[i].firstChild;
+          if (content) content.textContent = text;
+          cardEls[i].style.opacity = i === 0 ? "1" : String(0.85 - i * 0.12);
+          cardEls[i].style.zIndex = String(100 - i);
+          cardEls[i].style.transition = "none";
+          cardEls[i].style.transform = `translateX(-50%) translateY(${i * 18}px) rotate(${i * 1.4 - 2}deg)`;
+        }
+      }
+
+      function shuffleNext() {
+        headIndex++;
+        if (headIndex >= lyricsCards.length) headIndex = 0;
+        setTimeout(renderStack, 520);
+      }
+
+      function playBookPageAnim() {
+        const top = cardEls[0];
+        if (!top) return;
+        top.style.transformOrigin = "50% 0%";
+        top.animate([
+          { transform: top.style.transform, filter: "brightness(1)" },
+          { transform: "translateX(-50%) translateY(10px) rotateX(55deg) rotateZ(-2deg)", filter: "brightness(1.12)" },
+          { transform: "translateX(-50%) translateY(0px) rotateX(0deg) rotateZ(0deg)", filter: "brightness(1)" },
+        ], { duration: 520, easing: "ease-in-out", fill: "forwards" });
+        deck.animate([
+          { filter: "drop-shadow(0 14px 25px rgba(0,0,0,0.12))" },
+          { filter: "drop-shadow(0 22px 38px rgba(0,0,0,0.18))" },
+          { filter: "drop-shadow(0 14px 25px rgba(0,0,0,0.12))" },
+        ], { duration: 520, easing: "ease-in-out", fill: "forwards" });
+      }
+
+      nextBtn.addEventListener("click", (e) => { e.preventDefault(); playBookPageAnim(); shuffleNext(); });
+      closeBtn.addEventListener("click", () => {
+        const el = document.getElementById("lyricsSweepLayer");
+        if (el) el.remove();
+        document.body.style.overflow = "";
+      });
+      renderStack();
+      layer.appendChild(sweepWrap);
+      document.body.appendChild(layer);
+    }
+
+    // Add CSS keyframes for the deck animations
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+    @keyframes beatSweep {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(220%); }
+    }
+    @keyframes deckCardHeartFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+  `;
+    document.head.appendChild(styleSheet);
+
+    // ============================================================
+    // START
+    // ============================================================
+    init();
+  </script>
+</body>
+
+</html>
