@@ -1,4 +1,9 @@
 {
+  "name": "heartlink",
+  "version": "1.0.0",
+  "license": "MIT"
+}
+{
   "name": "heartlink-backend",
   "version": "1.0.0",
   "description": "HeartLink - Personalized Proposal Website Backend",
