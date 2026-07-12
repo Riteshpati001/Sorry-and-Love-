@@ -42,4 +42,5 @@ const deleteVoiceFromS3 = async (key) => {
   await s3Client.send(command);
 };
 
+// Exporting with the correct uppercase 'S'
 module.exports = { uploadVoiceToS3, deleteVoiceFromS3 };
