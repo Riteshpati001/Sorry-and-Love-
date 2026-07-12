@@ -1,287 +1,107 @@
+require('dotenv').config();
 const express = require('express');
-const router = express.Router();
-const Proposal = require('../models/proposal');
-const User = require('../models/User');
-const { protect } = require('../middleware/auth');
-const { upload, cloudinary } = require('../config/cloudinary');
-const { uploadVoiceToS3, deleteVoiceFromS3 } = require('../config/s3');
-const { sendProposalUpdateEmail } = require('../utils/mailer');
-const multer = require('multer');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 
-// Configure clean memory storage for voice note audio uploads to AWS S3
-const memoryStorage = multer.memoryStorage();
-const memoryUpload = multer({
-  storage: memoryStorage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit for recorded notes
-});
-
-// Fetch all proposals created by the logged-in user
-router.get('/', protect, async (req, res) => {
+const connectDB = async () => {
   try {
-    const proposals = await Proposal.find({ senderId: req.user._id }).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, proposals });
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(`Database connection error: ${error.message}`);
+    process.exit(1);
   }
+};
+
+const { deleteVoiceFromS3 } = require('./config/s3');
+const { cloudinary } = require('./config/cloudinary');
+const Proposal = require('./models/proposal'); // Updated to lowercase 'proposal'
+
+const app = express();
+
+// Securely configure helmet configurations to allow audio/video playback streams
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        mediaSrc: ["'self'", "https://*.amazonaws.com", "https://res.cloudinary.com"],
+        imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+  })
+);
+
+// Global api request rate-limiting defense
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes window duration
+  max: 100, // Limit each IP address to 100 requests per windowMs
+  message: { success: false, message: 'Too many requests, please slow down.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Create a new proposal
-router.post('/', protect, async (req, res) => {
-  const { receiverName, receiverEmail, introMessage, proposalMessage, galleryPassword, musicUrl } = req.body;
+app.use('/api/', apiLimiter);
+
+// Database initialization
+connectDB();
+
+// CORS origin constraints integration
+app.use(cors({
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  credentials: true,
+}));
+
+app.use(express.json());
+
+// Routes declarations
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/proposals', require('./routes/proposal'));
+
+// Periodic automatic cleanup process for media files older than 15 days
+const cleanExpiredMedia = async () => {
   try {
-    const slug = `${receiverName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-6)}`;
-    const proposal = await Proposal.create({
-      senderId: req.user._id,
-      receiverName,
-      receiverEmail,
-      slug,
-      introMessage,
-      proposalMessage,
-      galleryPassword,
-      musicUrl,
-    });
-    res.status(201).json({ success: true, proposal });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Fetch proposal details via slug (Public view for receiver)
-router.get('/slug/:slug', async (req, res) => {
-  try {
-    const proposal = await Proposal.findOne({ slug: req.params.slug });
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal experience not found' });
-    }
-
-    // Increment view count
-    proposal.views += 1;
-    await proposal.save();
-
-    const sanitizedProposal = {
-      _id: proposal._id,
-      receiverName: proposal.receiverName,
-      introMessage: proposal.introMessage,
-      proposalMessage: proposal.proposalMessage,
-      musicUrl: proposal.musicUrl,
-      status: proposal.status,
-      media: proposal.media,
-      hasPassword: !!proposal.galleryPassword,
-    };
-
-    res.status(200).json({ success: true, proposal: sanitizedProposal });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Update proposal text configurations
-router.put('/:id', protect, async (req, res) => {
-  const { receiverName, receiverEmail, introMessage, proposalMessage, galleryPassword, musicUrl } = req.body;
-  try {
-    let proposal = await Proposal.findById(req.params.id);
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal not found' });
-    }
-    if (proposal.senderId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: 'Unauthorized modification' });
-    }
-
-    proposal.receiverName = receiverName || proposal.receiverName;
-    proposal.receiverEmail = receiverEmail || proposal.receiverEmail;
-    proposal.introMessage = introMessage !== undefined ? introMessage : proposal.introMessage;
-    proposal.proposalMessage = proposalMessage !== undefined ? proposalMessage : proposal.proposalMessage;
-    proposal.galleryPassword = galleryPassword || proposal.galleryPassword;
-    proposal.musicUrl = musicUrl !== undefined ? musicUrl : proposal.musicUrl;
-
-    const updatedProposal = await proposal.save();
-    res.status(200).json({ success: true, proposal: updatedProposal });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Delete proposal completely
-router.delete('/:id', protect, async (req, res) => {
-  try {
-    const proposal = await Proposal.findById(req.params.id);
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal not found' });
-    }
-    if (proposal.senderId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: 'Unauthorized removal request' });
-    }
-
-    // Delete any associated asset files from Cloudinary and AWS S3
-    for (const file of proposal.media) {
-      if (file.fileType === 'audio') {
-        // Voice notes stored securely in AWS S3
-        await deleteVoiceFromS3(file.publicId);
-      } else {
-        // Images and videos stored in Cloudinary
-        let resourceType = 'image';
-        if (file.fileType === 'video') resourceType = 'video';
-        await cloudinary.uploader.destroy(file.publicId, { resource_type: resourceType });
+    const expirationThreshold = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000); // 15 days
+    const proposals = await Proposal.find({ 'media.uploadedAt': { $lt: expirationThreshold } });
+    
+    for (const proposal of proposals) {
+      const expiredItems = proposal.media.filter(item => item.uploadedAt < expirationThreshold);
+      for (const item of expiredItems) {
+        if (item.fileType === 'audio') {
+          // Clean S3 resources
+          await deleteVoiceFromS3(item.publicId);
+        } else {
+          // Clean Cloudinary images/videos
+          let resourceType = 'image';
+          if (item.fileType === 'video') resourceType = 'video';
+          await cloudinary.uploader.destroy(item.publicId, { resource_type: resourceType });
+        }
+        proposal.media.pull(item._id);
       }
-    }
-
-    await proposal.deleteOne();
-    res.status(200).json({ success: true, message: 'Proposal and all items removed completely' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Upload media attachment for a proposal with dynamic categorization
-router.post('/:id/media', protect, upload.single('file'), async (req, res) => {
-  try {
-    const proposal = await Proposal.findById(req.params.id);
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal not found' });
-    }
-    if (proposal.senderId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-
-    let fileType = 'image';
-    let options = { folder: 'heartlink_media' };
-
-    if (req.file.mimetype.startsWith('video/')) {
-      fileType = 'video';
-      options.resource_type = 'video';
-    } else if (req.file.mimetype.startsWith('audio/')) {
-      fileType = 'audio';
-      options.resource_type = 'video';
-    }
-
-    const result = await cloudinary.uploader.upload(req.file.path, options);
-
-    const newMedia = {
-      url: result.secure_url,
-      publicId: result.public_id,
-      fileType,
-      uploadedAt: new Date()
-    };
-
-    proposal.media.push(newMedia);
-    await proposal.save();
-
-    res.status(200).json({ success: true, media: proposal.media });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Securely record and upload a voice note specifically to AWS S3 storage
-router.post('/:id/voice-note', protect, memoryUpload.single('audio'), async (req, res) => {
-  try {
-    const proposal = await Proposal.findById(req.params.id);
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal not found' });
-    }
-    if (proposal.senderId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No recording file captured' });
-    }
-
-    const { url, key } = await uploadVoiceToS3(req.file.buffer, 'voicenote.webm', req.file.mimetype);
-
-    const newMedia = {
-      url,
-      publicId: key,
-      fileType: 'audio',
-      uploadedAt: new Date()
-    };
-
-    proposal.media.push(newMedia);
-    await proposal.save();
-
-    res.status(200).json({ success: true, media: proposal.media });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Delete specific media file inside a proposal
-router.delete('/:id/media/:mediaId', protect, async (req, res) => {
-  try {
-    const proposal = await Proposal.findById(req.params.id);
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal not found' });
-    }
-    if (proposal.senderId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-
-    const mediaItem = proposal.media.id(req.params.mediaId);
-    if (!mediaItem) {
-      return res.status(404).json({ success: false, message: 'Media item not found' });
-    }
-
-    if (mediaItem.fileType === 'audio') {
-      await deleteVoiceFromS3(mediaItem.publicId);
-    } else {
-      let resourceType = 'image';
-      if (mediaItem.fileType === 'video') resourceType = 'video';
-      await cloudinary.uploader.destroy(mediaItem.publicId, { resource_type: resourceType });
-    }
-
-    proposal.media.pull(req.params.mediaId);
-    await proposal.save();
-
-    res.status(200).json({ success: true, media: proposal.media });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Authenticate and unlock gallery access
-router.post('/slug/:slug/unlock-gallery', async (req, res) => {
-  const { password } = req.body;
-  try {
-    const proposal = await Proposal.findOne({ slug: req.params.slug });
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal experience not found' });
-    }
-
-    if (proposal.galleryPassword === password) {
-      res.status(200).json({ success: true, authenticated: true });
-    } else {
-      res.status(401).json({ success: false, message: 'Invalid gallery password' });
+      await proposal.save();
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Expired media auto-clean error:', error.message);
   }
+};
+
+// Run automated sweep check once every hour
+setInterval(cleanExpiredMedia, 60 * 60 * 1000);
+
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+  });
 });
 
-// Submit proposal decision status (Accept/Reject)
-router.post('/slug/:slug/respond', async (req, res) => {
-  const { response } = req.body;
-  try {
-    const proposal = await Proposal.findOne({ slug: req.params.slug });
-    if (!proposal) {
-      return res.status(404).json({ success: false, message: 'Proposal experience not found' });
-    }
-
-    proposal.status = response;
-    proposal.responseDate = new Date();
-    await proposal.save();
-
-    const sender = await User.findById(proposal.senderId);
-    if (sender) {
-      await sendProposalUpdateEmail(sender.email, proposal.receiverName, response);
-    }
-
-    res.status(200).json({ success: true, status: proposal.status });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server executing securely on port ${PORT}`);
 });
-
-module.exports = router;
