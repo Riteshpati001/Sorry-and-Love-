@@ -17,7 +17,7 @@ const connectDB = async () => {
 
 const { deleteVoiceFromS3 } = require('./config/s3');
 const { cloudinary } = require('./config/cloudinary');
-const Proposal = require('./models/proposal'); // Updated to lowercase 'proposal'
+const Proposal = require('./models/proposal'); // points to backend/models/proposal.js
 
 const app = express();
 
