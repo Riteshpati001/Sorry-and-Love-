@@ -102,10 +102,12 @@ const Dashboard = () => {
     }
   };
 
-  const handleCopy = (slug) => {
-    const fullLink = `${window.location.origin}/proposal/${slug}`;
+  // FALLBACK: Use proposal object directly to fall back to _id if slug is missing
+  const handleCopy = (proposal) => {
+    const slugOrId = proposal.slug || proposal._id;
+    const fullLink = `${window.location.origin}/proposal/${slugOrId}`;
     navigator.clipboard.writeText(fullLink);
-    setCopiedSlug(slug);
+    setCopiedSlug(proposal._id); // Store ID to track copied state accurately
     setTimeout(() => setCopiedSlug(''), 2000);
   };
 
@@ -293,14 +295,14 @@ const Dashboard = () => {
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 justify-between items-center">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleCopy(proposal.slug)}
+                        onClick={() => handleCopy(proposal)}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all"
                       >
-                        {copiedSlug === proposal.slug ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                        {copiedSlug === proposal.slug ? 'Copied' : 'Copy Link'}
+                        {copiedSlug === proposal._id ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                        {copiedSlug === proposal._id ? 'Copied' : 'Copy Link'}
                       </button>
                       <Link
-                        to={`/proposal/${proposal.slug}`}
+                        to={`/proposal/${proposal.slug || proposal._id}`}
                         target="_blank"
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all"
                       >
