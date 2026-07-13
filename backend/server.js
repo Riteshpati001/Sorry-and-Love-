@@ -27,6 +27,9 @@ const Proposal = require('./models/Proposal');
 
 const app = express();
 
+// Enable trust proxy so express-rate-limit can get the real client IP on Render
+app.set('trust proxy', 1);
+
 // Securely configure helmet configurations to allow audio/video playback streams
 app.use(
   helmet({
