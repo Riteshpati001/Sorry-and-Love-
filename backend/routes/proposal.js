@@ -95,4 +95,50 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
+// ==========================================
+// NEW ROUTE - POST: Add uploaded media details (metadata) to an existing proposal
+// ==========================================
+router.post('/:id/media', async (req, res, next) => {
+  try {
+    const { url, publicId, fileType } = req.body;
+
+    // 1. Basic validation of incoming metadata
+    if (!url || !publicId || !fileType) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: url, publicId, or fileType'
+      });
+    }
+
+    // 2. Find the target proposal
+    const proposal = await Proposal.findById(req.params.id);
+
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: 'Proposal not found'
+      });
+    }
+
+    // 3. Add the new media object to the proposal's media array
+    // (uploadedAt property is included to support your hourly cleanup task in server.js)
+    proposal.media.push({
+      url,
+      publicId,
+      fileType,
+      uploadedAt: new Date()
+    });
+
+    // 4. Save the updated proposal document to MongoDB
+    await proposal.save();
+
+    res.status(200).json({
+      success: true,
+      data: proposal
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
