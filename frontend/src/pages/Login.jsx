@@ -3,16 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import FloatingHearts from '../components/FloatingHearts';
 
-const Register = () => {
-  // 1. Added username state to capture the "Your Name" field
-  const [username, setUsername] = useState('');
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // 2. Destructure the register function from your AuthContext
-  const { register } = useContext(AuthContext);
+
+  // Use the 'login' function from your AuthContext instead of 'register'
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,15 +19,16 @@ const Register = () => {
     setError('');
 
     try {
-      // 3. Send username, email, and password to the backend via AuthContext
-      const data = await register(username, email, password);
+      const data = await login(email, password);
       if (data.success) {
         navigate('/dashboard');
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.message || 'Login failed');
       }
     } catch (err) {
-      setError('An unexpected error occurred.');
+      // Capture any API errors sent by the backend
+      const errMsg = err.response?.data?.message || err.message || 'An unexpected login error occurred.';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -40,8 +39,7 @@ const Register = () => {
       <FloatingHearts />
       
       <div className="max-w-md w-full bg-white/70 backdrop-blur-md rounded-3xl p-8 border border-pink-100 shadow-xl z-10">
-        {/* Changed title to match registration screen */}
-        <h2 className="text-3xl font-bold text-center text-rose-600 mb-6">Create Creator Profile</h2>
+        <h2 className="text-3xl font-bold text-center text-rose-600 mb-6">Log In to Your Profile</h2>
         
         {error && (
           <div className="bg-red-50 text-red-500 text-sm p-3 rounded-xl mb-4 text-center border border-red-100">
@@ -50,27 +48,14 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* 4. Added YOUR NAME input field mapped to 'username' */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your Name</label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. Jane Doe"
-              className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Email address</label>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. sender@heartlink.io"
+              placeholder="e.g. creator@domain.com"
               className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white"
             />
           </div>
@@ -82,7 +67,7 @@ const Register = () => {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               className="w-full px-4 py-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white"
             />
           </div>
@@ -92,14 +77,14 @@ const Register = () => {
             disabled={loading}
             className="w-full py-3 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-xl font-bold transition-all"
           >
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
 
         <p className="text-sm text-center text-slate-500 mt-6">
-          Already have an account?{' '}
-          <Link to="/login" className="text-rose-500 font-semibold hover:underline">
-            Sign In Here
+          Don't have an account?{' '}
+          <Link to="/register" className="text-rose-500 font-semibold hover:underline">
+            Register Here
           </Link>
         </p>
       </div>
@@ -107,4 +92,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
