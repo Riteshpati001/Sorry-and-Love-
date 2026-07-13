@@ -36,7 +36,13 @@ const ProposalView = () => {
     }
   };
 
+  // SAFETY CHECK: Handle undefined or empty slug before trying to fetch
   useEffect(() => {
+    if (!slug || slug === 'undefined') {
+      setError('The link you received is broken, incomplete, or invalid. Please ask the sender to generate and send a new link.');
+      setLoading(false);
+      return;
+    }
     fetchProposal();
   }, [slug]);
 
