@@ -58,7 +58,7 @@ app.use(cors({
 app.use(express.json());
 
 // Routes declarations
-app.use('/api/auth', require('./routes/auth'));
+const auth = require('../routes/auth');
 app.use('/api/proposals', require('./routes/proposal'));
 
 // Periodic automatic cleanup process for media files older than 15 days
