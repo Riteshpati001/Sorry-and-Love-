@@ -29,8 +29,8 @@ const Dashboard = () => {
       const response = await apiFetch('/api/proposals');
       const data = await response.json();
       if (data.success) {
-        // Safe Fallback: If 'data.proposals' is undefined or null, fallback to an empty array []
-        const fetchedProposals = data.proposals || [];
+        // Safe Fallback: Look for the 'data' key first, then fall back to 'proposals'
+        const fetchedProposals = data.data || data.proposals || [];
         setProposals(fetchedProposals);
         
         if (selectedProposal) {
