@@ -35,7 +35,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // ==========================================
-// ADDED ROUTE - GET: Retrieve a proposal by slug OR database ID
+// GET: Retrieve a proposal by slug OR database ID
 // ==========================================
 router.get('/slug/:slug', async (req, res, next) => {
   try {
@@ -65,7 +65,7 @@ router.get('/slug/:slug', async (req, res, next) => {
 });
 
 // ==========================================
-// ADDED ROUTE - POST: Respond to a proposal (accept/reject) by slug OR ID
+// POST: Respond to a proposal (accept/reject) by slug OR ID
 // ==========================================
 router.post('/slug/:slug/respond', async (req, res, next) => {
   try {
@@ -105,6 +105,63 @@ router.post('/slug/:slug/respond', async (req, res, next) => {
   }
 });
 
+// ==========================================
+// NEW ROUTE - POST: Verify passcode to unlock private gallery
+// ==========================================
+router.post('/slug/:slug/unlock-gallery', async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    
+    // Extract password/code sent from the frontend (handles common variable names)
+    const password = req.body.password || req.body.passcode || req.body.code;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password is required to unlock this gallery.'
+      });
+    }
+
+    const query = mongoose.Types.ObjectId.isValid(slug)
+      ? { _id: slug }
+      : { slug: slug };
+
+    const proposal = await Proposal.findOne(query);
+
+    if (!proposal) {
+      return res.status(404).json({
+        success: false,
+        message: 'Proposal not found'
+      });
+    }
+
+    // Adjust these field names to match whatever key is defined in your Proposal model schema
+    const storedPassword = proposal.galleryPassword || proposal.password || proposal.passcode;
+
+    if (!storedPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'No password is set up for this romantic gallery.'
+      });
+    }
+
+    if (storedPassword !== password) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid password. Please try again.'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Gallery unlocked successfully!',
+      media: proposal.media 
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET: Retrieve a single proposal by ID
 router.get('/:id', async (req, res, next) => {
   try {
@@ -122,7 +179,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // ==========================================
-// NEW ROUTE - DELETE: Remove proposal & media
+// DELETE: Remove proposal & media
 // ==========================================
 router.delete('/:id', async (req, res, next) => {
   try {
@@ -140,16 +197,13 @@ router.delete('/:id', async (req, res, next) => {
       for (const item of proposal.media) {
         try {
           if (item.fileType === 'audio') {
-            // Remove from S3
             await deleteVoiceFromS3(item.publicId);
           } else {
-            // Remove from Cloudinary (image or video)
             let resourceType = 'image';
             if (item.fileType === 'video') resourceType = 'video';
             await cloudinary.uploader.destroy(item.publicId, { resource_type: resourceType });
           }
         } catch (mediaError) {
-          // Log media cleanup errors but don't stop the database deletion
           console.error(`Error deleting media file ${item.publicId}:`, mediaError.message);
         }
       }
@@ -168,23 +222,20 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 // ==========================================
-// NEW ROUTE - POST: Add uploaded media details (metadata) to an existing proposal
+// POST: Add uploaded media details (metadata) to an existing proposal
 // ==========================================
 router.post('/:id/media', async (req, res, next) => {
   try {
-    // 1. Helper logs to trace incoming payloads in your Render Console
     console.log("=== INCOMING MEDIA REQUEST ===");
     console.log("Proposal ID:", req.params.id);
     console.log("Content-Type Header:", req.headers['content-type']);
     console.log("Request Body:", req.body);
     console.log("===============================");
 
-    // 2. Extract values flexibly from camelCase or Cloudinary's default snake_case responses
     const url = req.body.url || req.body.secure_url;
     const publicId = req.body.publicId || req.body.public_id;
     const fileType = req.body.fileType || req.body.file_type || req.body.resource_type;
 
-    // 3. Validation fallback with debug context
     if (!url || !publicId || !fileType) {
       return res.status(400).json({
         success: false,
@@ -193,7 +244,6 @@ router.post('/:id/media', async (req, res, next) => {
       });
     }
 
-    // 4. Locate target proposal
     const proposal = await Proposal.findById(req.params.id);
 
     if (!proposal) {
@@ -203,7 +253,6 @@ router.post('/:id/media', async (req, res, next) => {
       });
     }
 
-    // 5. Append new media metadata to the array
     proposal.media.push({
       url,
       publicId,
@@ -211,7 +260,6 @@ router.post('/:id/media', async (req, res, next) => {
       uploadedAt: new Date()
     });
 
-    // 6. Persist changes in MongoDB
     await proposal.save();
 
     res.status(200).json({
@@ -224,7 +272,7 @@ router.post('/:id/media', async (req, res, next) => {
 });
 
 // ==========================================
-// NEW ROUTE - DELETE: Remove an individual media item from a proposal & S3/Cloudinary
+// DELETE: Remove an individual media item from a proposal & S3/Cloudinary
 // ==========================================
 router.delete('/:id/media/:mediaId', async (req, res, next) => {
   try {
@@ -237,7 +285,6 @@ router.delete('/:id/media/:mediaId', async (req, res, next) => {
       });
     }
 
-    // Find the specific media item inside the proposal's media sub-document array
     const mediaItem = proposal.media.id(req.params.mediaId);
 
     if (!mediaItem) {
@@ -247,7 +294,6 @@ router.delete('/:id/media/:mediaId', async (req, res, next) => {
       });
     }
 
-    // Clean up the storage resource from the cloud
     try {
       if (mediaItem.fileType === 'audio') {
         await deleteVoiceFromS3(mediaItem.publicId);
@@ -260,14 +306,13 @@ router.delete('/:id/media/:mediaId', async (req, res, next) => {
       console.error(`Storage deletion failed for ${mediaItem.publicId}:`, mediaError.message);
     }
 
-    // Remove from MongoDB array
     proposal.media.pull(req.params.mediaId);
     await proposal.save();
 
     res.status(200).json({
       success: true,
       data: proposal,
-      media: proposal.media // Return updated media list to keep frontend in sync
+      media: proposal.media
     });
   } catch (error) {
     next(error);
