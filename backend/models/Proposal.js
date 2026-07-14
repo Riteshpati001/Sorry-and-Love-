@@ -12,14 +12,31 @@ const proposalSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  receiver: { 
+  // 👈 CHANGED: Replaced 'receiver' with 'receiverEmail' to match your frontend payload
+  receiverEmail: { 
     type: String, 
     required: true 
+  },
+  // 👈 ADDED: Added 'receiverName' to match your frontend payload
+  receiverName: { 
+    type: String,
+    required: true
   },
   status: { 
     type: String, 
     default: 'pending', // This ensures every new proposal starts as 'pending'
     enum: ['pending', 'accepted', 'rejected'] // Restricts the field to these 3 values
+  },
+  // 👈 ADDED: Added 'introMessage' and 'proposalMessage'
+  introMessage: {
+    type: String 
+  },
+  proposalMessage: {
+    type: String 
+  },
+  // 👈 ADDED: Added 'musicUrl' to save the MP3 link from your frontend form
+  musicUrl: {
+    type: String
   },
   title: { 
     type: String 
@@ -27,7 +44,7 @@ const proposalSchema = new mongoose.Schema({
   description: { 
     type: String 
   },
-  // 👈 ADDED FIELD: Stores the password to unlock the private gallery
+  // Stores the password to unlock the private gallery
   galleryPassword: {
     type: String,
     default: null 
