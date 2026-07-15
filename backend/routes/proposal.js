@@ -43,9 +43,6 @@ const getProposalById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Proposal not found" });
     }
 
-    // NOTE: Depending on your frontend setup, it might expect the raw proposal object directly.
-    // If the page loads but text doesn't show, try changing the line below to:
-    // return res.status(200).json(proposal);
     return res.status(200).json({
       success: true,
       data: proposal
@@ -177,12 +174,79 @@ const addMediaToProposal = async (req, res) => {
   }
 };
 
+// --- 6. POST ROUTE HANDLER (Unlock Gallery) ---
+const unlockGallery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    let proposal;
+    const mongoose = require('mongoose');
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      proposal = await Proposal.findById(id);
+    }
+    if (!proposal) {
+      proposal = await Proposal.findOne({ slug: id });
+    }
+
+    if (!proposal) {
+      return res.status(404).json({ success: false, message: "Proposal not found" });
+    }
+
+    // Direct string comparison for plaintext passwords (matching frontend database response)
+    if (proposal.galleryPassword === password) {
+      return res.status(200).json({ success: true, message: "Gallery unlocked successfully" });
+    } else {
+      return res.status(400).json({ success: false, message: "Incorrect decryption gallery code." });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// --- 7. POST ROUTE HANDLER (Submit final decision: accepted/rejected) ---
+const respondToProposal = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { response } = req.body; // 'accepted' or 'rejected'
+
+    if (!response || !['accepted', 'rejected'].includes(response)) {
+      return res.status(400).json({ success: false, message: "Invalid response status" });
+    }
+
+    let proposal;
+    const mongoose = require('mongoose');
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      proposal = await Proposal.findById(id);
+    }
+    if (!proposal) {
+      proposal = await Proposal.findOne({ slug: id });
+    }
+
+    if (!proposal) {
+      return res.status(404).json({ success: false, message: "Proposal not found" });
+    }
+
+    proposal.status = response;
+    await proposal.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Proposal response updated to: ${response}`,
+      data: proposal
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 // --- ROUTE DEFINITIONS ---
 
 // GET /api/proposals - Fetch all proposals
 router.get('/', getProposals);
 
-// GET /api/proposals/slug/:id - Fetch by slug or ID (Fixes the new "slug" 404 error!)
+// GET /api/proposals/slug/:id - Fetch by slug or ID
 router.get('/slug/:id', getProposalById);
 
 // GET /api/proposals/:id - Fallback to fetch directly by ID
@@ -196,6 +260,13 @@ router.delete('/:id', deleteProposal);
 
 // POST /api/proposals/:id/media - Attach media
 router.post('/:id/media', addMediaToProposal);
+
+// POST /api/proposals/slug/:id/unlock-gallery - Unlocks protected gallery (Matches your frontend perfectly!)
+router.post('/slug/:id/unlock-gallery', unlockGallery);
+
+// POST /api/proposals/slug/:id/respond - Responds to the proposal (Fixes the future Step 5 decision submit!)
+router.post('/slug/:id/respond', respondToProposal);
+
 
 // --- EXPORT THE ROUTER ---
 module.exports = router;
