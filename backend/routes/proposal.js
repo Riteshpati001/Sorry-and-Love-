@@ -2,10 +2,31 @@ const express = require('express');
 const router = express.Router();
 const Proposal = require('../models/Proposal'); // Adjust path to your model if needed
 
-// Your API route logic for handling POST /api/proposals
+// --- 1. GET ROUTE HANDLER (Fetch all proposals) ---
+const getProposals = async (req, res) => {
+  try {
+    // Fetch proposals from the database, sorting them by newest first
+    const proposals = await Proposal.find().sort({ createdAt: -1 });
+    
+    // NOTE: Depending on how your frontend state is set up, it might expect the raw array directly.
+    // If you run into another syntax/mapping error, try changing the line below to:
+    // res.status(200).json(proposals);
+    res.status(200).json({
+      success: true,
+      data: proposals
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+// --- 2. POST ROUTE HANDLER (Create a proposal) ---
 const createProposal = async (req, res) => {
   try {
-    // 1. Destructure the new fields exactly as they are sent from the frontend payload
+    // Destructure the new fields exactly as they are sent from the frontend payload
     const { 
       receiverEmail, 
       receiverName, 
@@ -16,7 +37,7 @@ const createProposal = async (req, res) => {
       sender // Usually passed from authenticated user, or frontend if included
     } = req.body;
 
-    // 2. Create the proposal using the new schema structure
+    // Create the proposal using the new schema structure
     const newProposal = new Proposal({
       sender: sender || req.user?.email || "Anonymous", // Fallback if sender is handled differently
       receiverEmail,
@@ -27,7 +48,7 @@ const createProposal = async (req, res) => {
       musicUrl
     });
 
-    // 3. Save to database
+    // Save to database
     await newProposal.save();
 
     res.status(201).json({ 
@@ -46,11 +67,11 @@ const createProposal = async (req, res) => {
 
 // --- ROUTE DEFINITIONS ---
 
-// This maps to: POST /api/proposals/
-router.post('/', createProposal);
+// GET /api/proposals - Handles fetching proposals (Fixes the 404 error)
+router.get('/', getProposals);
 
-// If you need to add more routes later (like fetching a proposal), you can define them here:
-// router.get('/:id', getProposalById);
+// POST /api/proposals - Handles creating proposals
+router.post('/', createProposal);
 
 // --- EXPORT THE ROUTER ---
 module.exports = router;
