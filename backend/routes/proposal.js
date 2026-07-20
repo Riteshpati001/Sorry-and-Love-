@@ -1,6 +1,7 @@
 const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 const nodemailer = require('nodemailer'); // Import nodemailer
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken to verify tokens
 const Proposal = require('../models/Proposal'); // Adjust path to your model if needed
 
 // Import S3 and Cloudinary configs for media cleanup upon deletion
@@ -8,7 +9,6 @@ const { deleteVoiceFromS3 } = require('../config/s3');
 const { cloudinary } = require('../config/cloudinary');
 
 // --- Nodemailer Transporter Configuration ---
-// This uses Gmail as a default. You can adjust it to SendGrid, Mailgun, etc.
 const transporter = nodemailer.createTransport({
   service: 'gmail', 
   auth: {
@@ -16,6 +16,42 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS  // Your Google App Password
   }
 });
+
+// --- Authentication Middleware ---
+// This extracts and verifies the token, populating req.user with your logged-in user data
+const protect = (req, res, next) => {
+  try {
+    let token;
+
+    // 1. Check for token in Authorization Header (Bearer <token>)
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    // 2. Check for token in cookies as a fallback
+    else if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Unauthorized: No active user session found" 
+      });
+    }
+
+    // Verify token using the secret key in your .env file
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Attach decoded token data (which should contain user email) to req.user
+    req.user = decoded; 
+    next();
+  } catch (error) {
+    return res.status(401).json({ 
+      success: false, 
+      message: "Unauthorized: Session is invalid or expired" 
+    });
+  }
+};
 
 // --- 1. GET ROUTE HANDLER (Fetch proposals for the logged-in user) ---
 const getProposals = async (req, res) => {
@@ -249,7 +285,6 @@ const respondToProposal = async (req, res) => {
     await proposal.save();
 
     // --- SEND NOTIFICATION EMAIL TO SENDER ---
-    // Check if the sender is a valid email address and not "Anonymous"
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (proposal.sender && emailRegex.test(proposal.sender)) {
       
@@ -280,7 +315,6 @@ const respondToProposal = async (req, res) => {
         html: emailHtml
       };
 
-      // Send the email asynchronously so we do not slow down the server response
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.error("Failed to send email to sender:", error.message);
@@ -303,8 +337,8 @@ const respondToProposal = async (req, res) => {
 
 // --- ROUTE DEFINITIONS ---
 
-// GET /api/proposals - Fetch all proposals for the logged-in user
-router.get('/', getProposals);
+// GET /api/proposals - Protected by our JWT Middleware 'protect'
+router.get('/', protect, getProposals);
 
 // GET /api/proposals/slug/:id - Fetch by slug or ID
 router.get('/slug/:id', getProposalById);
@@ -312,8 +346,8 @@ router.get('/slug/:id', getProposalById);
 // GET /api/proposals/:id - Fallback to fetch directly by ID
 router.get('/:id', getProposalById);
 
-// POST /api/proposals - Create a proposal
-router.post('/', createProposal);
+// POST /api/proposals - Create a proposal (Protected so req.user.email is set)
+router.post('/', protect, createProposal);
 
 // DELETE /api/proposals/:id - Delete a proposal
 router.delete('/:id', deleteProposal);
