@@ -17,21 +17,27 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// --- Authentication Middleware ---
-// This extracts and verifies the token, populating req.user with your logged-in user data
+// --- Authentication Middleware (Supports both Sessions and JWT) ---
 const protect = (req, res, next) => {
   try {
+    // 1. SESSION FALLBACK: If a global session middleware (like Passport or express-session) 
+    // has already authenticated the user and populated req.user, let them pass!
+    if (req.user && req.user.email) {
+      return next();
+    }
+
     let token;
 
-    // 1. Check for token in Authorization Header (Bearer <token>)
+    // 2. JWT HEADER CHECK: Check for token in Authorization Header (Bearer <token>)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
     }
-    // 2. Check for token in cookies as a fallback
+    // 3. JWT COOKIE CHECK: Check for token in cookies as a fallback
     else if (req.cookies && req.cookies.token) {
       token = req.cookies.token;
     }
 
+    // If no session exists and no token is found, deny access
     if (!token) {
       return res.status(401).json({ 
         success: false, 
@@ -337,7 +343,7 @@ const respondToProposal = async (req, res) => {
 
 // --- ROUTE DEFINITIONS ---
 
-// GET /api/proposals - Protected by our JWT Middleware 'protect'
+// GET /api/proposals - Protected by our JWT & Session Middleware 'protect'
 router.get('/', protect, getProposals);
 
 // GET /api/proposals/slug/:id - Fetch by slug or ID
