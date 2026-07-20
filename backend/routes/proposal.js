@@ -6,10 +6,22 @@ const Proposal = require('../models/Proposal'); // Adjust path to your model if 
 const { deleteVoiceFromS3 } = require('../config/s3');
 const { cloudinary } = require('../config/cloudinary');
 
-// --- 1. GET ROUTE HANDLER (Fetch all proposals) ---
+// --- 1. GET ROUTE HANDLER (Fetch proposals for the logged-in user) ---
 const getProposals = async (req, res) => {
   try {
-    const proposals = await Proposal.find().sort({ createdAt: -1 });
+    // Retrieve the logged-in user's email (populated by authentication middleware)
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Unauthorized: No active user session found" 
+      });
+    }
+
+    // Filter by 'sender' so users only see their own proposals
+    const proposals = await Proposal.find({ sender: userEmail }).sort({ createdAt: -1 });
+
     res.status(200).json({
       success: true,
       data: proposals
@@ -243,7 +255,9 @@ const respondToProposal = async (req, res) => {
 
 // --- ROUTE DEFINITIONS ---
 
-// GET /api/proposals - Fetch all proposals
+// GET /api/proposals - Fetch all proposals for the logged-in user
+// Note: If auth middleware is not applied globally in your server.js/app.js file, 
+// make sure to import and inject it here (e.g., router.get('/', authMiddleware, getProposals))
 router.get('/', getProposals);
 
 // GET /api/proposals/slug/:id - Fetch by slug or ID
@@ -261,10 +275,10 @@ router.delete('/:id', deleteProposal);
 // POST /api/proposals/:id/media - Attach media
 router.post('/:id/media', addMediaToProposal);
 
-// POST /api/proposals/slug/:id/unlock-gallery - Unlocks protected gallery (Matches your frontend perfectly!)
+// POST /api/proposals/slug/:id/unlock-gallery - Unlocks protected gallery
 router.post('/slug/:id/unlock-gallery', unlockGallery);
 
-// POST /api/proposals/slug/:id/respond - Responds to the proposal (Fixes the future Step 5 decision submit!)
+// POST /api/proposals/slug/:id/respond - Responds to the proposal
 router.post('/slug/:id/respond', respondToProposal);
 
 
